@@ -52,7 +52,7 @@
     overflow:hidden; -webkit-font-smoothing:antialiased;
   }
   #stage{position:fixed; inset:0; z-index:0; background:radial-gradient(120% 120% at 50% 42%, #0b0d1a 0%, #05060a 70%)}
-  #stage canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+  #stage canvas{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none}
 
   /* ── overlay chrome ─────────────────────────────── */
   .ui{position:fixed; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; padding:1.5rem 2rem 2rem}
@@ -156,7 +156,9 @@
   let phase = [];           // per-particle drift phase
   let rotY = 0, rotX = 0, spin = 0;
   let drag = false, dx = 0, dy = 0, targetRotY = 0, targetRotX = 0;
-  let n = 2048, spreadNow = 0;
+  let n = 2048, spreadNow = 0, energyNow = 0.15;
+  let reducedMQ = null;
+  const isReduced = () => (reducedMQ ? reducedMQ.matches : false);
 
   /* pure spread curve — frozen contract: monotonic in energy ∈ [0,1], returns a number */
   function setSpread(energy) {
@@ -181,11 +183,12 @@
 
   function initSphere(stageEl) {
     if (!window.THREE) return false;
+    if (renderer) return true; // idempotent: never double-init
 
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    reducedMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
     const small = Math.min(window.innerWidth, window.innerHeight) < 520;
-    if (isReduced) n = 768;
+    if (isReduced()) n = 768;
     else if (small) n = 1024;
     else n = Math.round(2048 * Math.min(dpr, 1.5));
 
@@ -243,18 +246,25 @@
     scene.add(points);
 
     // pointer drag → rotate the constellation (a hint; it keeps its own life)
-    window.addEventListener("pointerdown", (ev) => {
+    const el = renderer.domElement;
+    el.addEventListener("pointerdown", (ev) => {
       drag = true; dx = ev.clientX; dy = ev.clientY;
+      try { el.setPointerCapture(ev.pointerId); } catch (e) {}
       ev.preventDefault();
     });
-    window.addEventListener("pointermove", (ev) => {
+    el.addEventListener("pointermove", (ev) => {
       if (!drag) return;
       const nx = ev.clientX - dx, ny = ev.clientY - dy;
       dx = ev.clientX; dy = ev.clientY;
       targetRotY += nx * 0.005;
       targetRotX += ny * 0.005;
     });
-    window.addEventListener("pointerup", () => { drag = false; });
+    const endDrag = () => { drag = false; };
+    el.addEventListener("pointerup", endDrag);
+    el.addEventListener("pointercancel", endDrag);
+    el.addEventListener("webglcontextlost", (ev) => {
+      ev.preventDefault(); // Three re-inits context on restore
+    });
     window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -266,31 +276,42 @@
 
   function render(dt, t) {
     if (!points || !geo) return;
-    const energy = window.__energy ? window.__energy.value : IDLE_BASELINE;
+    // smooth attack/release on energy so the shell breathes, never flutters
+    const raw = window.__energy ? window.__energy.value : 0.15;
+    energyNow += (raw - energyNow) * (1 - Math.exp(-dt * 4));
+    const energy = energyNow;
     const spread = setSpread(energy);
 
-    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = isReduced();
     const arr = geo.attributes.position.array;
     const R = 2.1;                       // sphere radius
-    const maxR = R * (1 + 1.35 * spread); // unfold outward with energy
-    const idleSway = isReduced ? 0 : 0.03;
-    const drift = isReduced ? 0 : 0.05;
+    const maxR = R * (1 + 1.9 * spread); // unfold outward with energy (2.1 → ~6.0)
+    const idleSway = reduced ? 0 : 0.03;
+    const drift = reduced ? 0 : 0.05;
     for (let i = 0; i < n; i++) {
       const b = base[i];
-      const sway = Math.sin(t * 0.6 + phase[i]) * idleSway + Math.sin(t * 0.23 + phase[i] * 1.7) * drift;
-      const r = maxR * (1 + sway * Math.sin(phase[i] * 3 + energy * 6));
+      // surface-coherent wave: keyed to the intrinsic y-coordinate (the 2D
+      // surface param), plus a small random life term for organic motion
+      const surf = Math.sin(b.y * 6.0 + t * 0.6 + phase[i] * 0.4) * 0.5 + 0.5;
+      const sway = Math.sin(t * 0.6 + phase[i]) * idleSway + surf * drift;
+      const r = maxR * (1 + sway * (0.35 + energy * 1.4));
       arr[i * 3] = b.x * r;
       arr[i * 3 + 1] = b.y * r;
       arr[i * 3 + 2] = b.z * r;
     }
     geo.attributes.position.needsUpdate = true;
 
-    spin += dt * (isReduced ? 0.05 : 0.18);
+    spin += dt * (reduced ? 0.05 : 0.18);
     rotY += (targetRotY - rotY) * Math.min(1, dt * 6);
     rotX += (targetRotX - rotX) * Math.min(1, dt * 6);
     points.rotation.y = spin + rotY;
     points.rotation.x = rotX;
-    if (renderer && scene && camera) renderer.render(scene, camera);
+    try {
+      if (renderer && scene && camera) renderer.render(scene, camera);
+    } catch (err) {
+      // never let a WebGL hiccup kill the animation loop
+      console.warn("render:", err);
+    }
   }
 
   window.engine = window.engine || {};

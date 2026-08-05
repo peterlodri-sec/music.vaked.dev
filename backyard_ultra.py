@@ -115,7 +115,8 @@ def run_lap(lap: int, total: int):
     for i in issues:
         print(f"  - {i}")
     print(SIGN)
-    save_state(lap)
+    if ok:
+        save_state(lap)
     return ok
 
 
