@@ -376,18 +376,23 @@
   }
   const rng = makeLCG(SEED);
 
-  /* ── pure scheduler seam (node-testable: no ctx, no AudioContext) ──
-     Returns the note times, in beats, for one bar of the progression:
-     pad hits on the four beats, bass on the offbeats, and a seeded
-     melody scatter over the sixteenth grid. Strictly increasing and
-     finite; same seed → same array.                                      */
-  function schedule(seed) {
+  /* ── shared bar planner — ONE code path for schedule() and the runtime ──
+     Computes, deterministically from a seed, the full event grid of one
+     16-step bar: pad hits on the four beats, bass on the offbeats, and a
+     seeded melody scatter. schedule() exposes it as strictly-increasing
+     finite note times (the node-testable seam); scheduleStep() consumes
+     the same per-step grids. Not a decoy: both use barPlan().           */
+  function barPlan(seed) {
     const r = makeLCG(seed === undefined ? SEED : seed);
-    const times = [];
-    for (let b = 0; b < 4; b++) times.push(b);            // pad + bass root
-    for (let e = 1; e < 8; e += 1) times.push(e * 0.5);   // bass offbeats
+    const bassAt = [], melAt = [];
     for (let i = 0; i < 16; i++) {
-      if (r() < 0.5) times.push(i * 0.25);                // melody scatter
+      bassAt.push(i === 0 || i % 2 === 1);          // beats + offbeats
+      melAt.push(r() < 0.5);                        // seeded melody scatter
+    }
+    const times = [];
+    for (let i = 0; i < 16; i++) {
+      if (i === 0 || bassAt[i]) times.push(i * 0.25);
+      if (melAt[i]) times.push(i * 0.25);
     }
     times.sort(function (a, b) { return a - b; });
     const out = [];
@@ -395,8 +400,9 @@
       const t = times[i];
       if (i === 0 || t > out[out.length - 1]) out.push(t);
     }
-    return out;
+    return { times: out, bassAt: bassAt, melAt: melAt };
   }
+  function schedule(seed) { return barPlan(seed).times; }
 
   /* ── engine state ── */
   let ctx = null, master = null, comp = null, analyser = null;
@@ -450,8 +456,8 @@
     const s16 = s % 16;
     const prog = PROGRESSION[bar % PROGRESSION.length];
     if (s16 === 0) pad(prog.pad, t);              // chord on the bar
-    if (BASS_PAT[s16]) bass(prog.root, t);        // warm bass line
-    if (rng() < 0.3) melody(t, SIXTEENTH * 2);    // wandering melody
+    if (barPlan.bassAt && barPlan.bassAt[s16]) bass(prog.root, t);   // warm bass line
+    if (barPlan.melAt && barPlan.melAt[s16]) melody(t, SIXTEENTH * 2); // melody scatter
   }
 
   function tick() {
