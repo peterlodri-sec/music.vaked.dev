@@ -124,7 +124,7 @@
 <div class="warnings" id="warnings">
   <div class="w" id="w-autoplay">audio needs a tap to start — your browser gates the tv’s signal.</div>
   <div class="w" id="w-webaudio">Web Audio is unavailable here — the sphere will still breathe, but silent.</div>
-  <div class="w" id="w-webgl">WebGL is unavailable — falling back to a 2D constellation.</div>
+  <div class="w" id="w-webgl">the signal stays dark — WebGL is unavailable here. try another browser.</div>
   <div class="w" id="w-motion">reduced motion is on — the sphere still spreads, gently.</div>
 </div>
 
@@ -196,7 +196,7 @@
     camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.z = 9;
 
-    renderer = new THREE.WebGLRenderer({ antialias: !isReduced, alpha: true, powerPreference: "high-performance" });
+    renderer = new THREE.WebGLRenderer({ antialias: !isReduced(), alpha: true, powerPreference: "high-performance" });
     renderer.setPixelRatio(dpr);
     renderer.setSize(window.innerWidth, window.innerHeight);
     stageEl.appendChild(renderer.domElement);
@@ -316,6 +316,7 @@
 
   window.engine = window.engine || {};
   window.engine.initSphere = initSphere;
+  window.engine.__sphereRender = render;
   window.engine.render = render;
   window.engine.setSpread = setSpread;
 })();
@@ -351,7 +352,7 @@
   const SIXTEENTH = BEAT / 4;
   const BARS = 4;                       // I vi IV V → 4 bars, 64 sixteenths
   const STEPS = BARS * 16;
-  const LOOKAHEAD = 0.35;               // schedule this far ahead (s)
+  const LOOKAHEAD = 1.2;                // schedule this far ahead (s) — ≥1s survives background-tab timer throttling
   const INTERVAL = 25;                  // scheduler poll interval (ms)
   const IDLE = 0.15;                    // must track the frozen contract
 
@@ -596,8 +597,10 @@
   }
 
   /* hook into the existing render loop: the audio engine drives the
-     energy field the P2 sphere consumes — one call per animation frame */
-  const p2Render = window.engine.render;
+     energy field the P2 sphere consumes — one call per animation frame.
+     P2 stores its render at the stable slot __sphereRender so this
+     wrapper is load-order-independent (P2 may be before OR after P3). */
+  const p2Render = window.engine.__sphereRender || window.engine.render;
   window.engine.render = function (dt, t) {
     try { updateEnergy(dt, t); } catch (err) { console.warn("energy:", err); }
     if (p2Render) return p2Render(dt, t);
@@ -659,8 +662,12 @@ window.engine = Object.assign(Object.create(null), {
 
 function boot() {
   if (reducedMotion) warn("w-motion");
-  if (!hasWebAudio) warn("w-webaudio");
-  else warn("w-autoplay");
+  if (!hasWebAudio) {
+    warn("w-webaudio");
+    badgeAudio.textContent = "audio — unavailable";
+  } else {
+    warn("w-autoplay");
+  }
 
   if (window.THREE && typeof engine.initSphere === "function") {
     try { engine.initSphere(stage); }

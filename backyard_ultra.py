@@ -84,9 +84,13 @@ def gates(lap: int) -> tuple[bool, list[str]]:
             issues.append(f"missing {f}")
 
     for m in MARKERS.get(lap, []):
-        if m not in html:
+        hay = ""
+        for f in LAPS[lap - 1][1]:
+            if (HERE / f).exists():
+                hay += (HERE / f).read_text(encoding="utf-8", errors="ignore")
+        if m not in hay:
             ok = False
-            issues.append(f"marker '{m}' missing")
+            issues.append(f"marker '{m}' missing in {LAPS[lap - 1][1]}")
 
     return ok, issues
 

@@ -166,6 +166,18 @@ if (typeof engine.schedule !== "function" || typeof engine.__barPlan !== "functi
   if (starts.length === 0) failures.push("runtime scheduler produced no note start times");
 }
 
+// P1: render-chain live check — call engine.render() in the sandbox and assert
+// the energy contract moved. This catches the silent merge-chain break
+// (e.g. P3 wrapping undefined render → energy frozen at baseline forever).
+if (typeof engine.render !== "function") {
+  failures.push("engine.render missing — no render chain");
+} else {
+  const before = { ...energy };
+  try { engine.render(1 / 60, 3.0); } catch (err) { failures.push(`engine.render threw: ${err.message}`); }
+  const moved = energy.tempo !== before.tempo || energy.rms !== before.rms || energy.band !== before.band;
+  if (!moved) failures.push("engine.render(1/60,3) did not move the energy contract (merge chain broken)");
+}
+
 // NaN sweep on the energy contract object
 for (const [k, v] of Object.entries(energy)) {
   if (typeof v === "number" && Number.isNaN(v)) failures.push(`energy.${k} is NaN`);
