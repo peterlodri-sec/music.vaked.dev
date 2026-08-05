@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<!--
+  music.vaked.dev — intergalactic cogito ergo sum TV
+  SPDX-License-Identifier: AGPL-3.0-only
+  Source: https://github.com/peterlodri-sec/music.vaked.dev
+
+  A screen that is powered but receives no input — a universal HDMI plug lying
+  on the carpet floor — and so it broadcasts its own signal from within.
+
+  SPREAD SPHERE ALL  → Three.js particle sphere, spreads into a constellation
+                       with the music's energy; breathes at an idle baseline.
+  INTO LOVE          → procedural Web Audio engine: love-diatonic pads, melody,
+                       bass, generated live. No samples, no assets, no backend.
+  0 + 1              → an LFO and an analyser agree on the energy that drives
+                       the sphere. Three.js pinned to 0.160.0 because r161+
+                       removes the UMD build (a bump silently 404s the sphere).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>music.vaked.dev · intergalactic cogito ergo sum TV</title>
+<meta name="description" content="A self-generating constellation that broadcasts its own music. Three.js sphere + procedural Web Audio. No samples, no assets, no input.">
+<meta name="theme-color" content="#05060a">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:title" content="music.vaked.dev · SPREAD SPHERE ALL · INTO LOVE">
+<meta property="og:description" content="An intergalactic cogito ergo sum TV. A screen with no input that broadcasts its own signal — music generated live from the void.">
+<meta property="og:url" content="https://music.vaked.dev/">
+<meta property="og:image" content="https://music.vaked.dev/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="music.vaked.dev · SPREAD SPHERE ALL · INTO LOVE">
+<meta name="twitter:description" content="An intergalactic cogito ergo sum TV. A screen with no input that broadcasts its own signal — music generated live from the void.">
+<meta name="twitter:image" content="https://music.vaked.dev/og-image.png">
+<style>
+  :root{
+    --bg:#05060a; --ink:#e7e2f7; --dim:#9a93b8;
+    --line:rgba(170,150,255,.18); --glass:rgba(11,10,21,.80);
+    --accent:#b48bff; --accent2:#62e6c9; --warn:#ffcf5c;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    overflow:hidden; -webkit-font-smoothing:antialiased;
+  }
+  #stage{position:fixed; inset:0; z-index:0; background:radial-gradient(120% 120% at 50% 42%, #0b0d1a 0%, #05060a 70%)}
+  #stage canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+
+  /* ── overlay chrome ─────────────────────────────── */
+  .ui{position:fixed; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; padding:1.5rem 2rem 2rem}
+  .top{display:flex; justify-content:space-between; align-items:flex-start; gap:1rem}
+  .wordmark{font-family:var(--mono); font-size:.8rem; letter-spacing:.28em; color:var(--dim); text-transform:uppercase}
+  .wordmark b{color:var(--accent2); font-weight:700}
+  .badges{display:flex; gap:.5rem; flex-wrap:wrap}
+  .badge{font-family:var(--mono); font-size:.62rem; letter-spacing:.18em; color:var(--dim); border:1px solid var(--line); border-radius:999px; padding:.3rem .7rem; background:var(--glass); backdrop-filter:blur(8px)}
+  .badge.on{color:var(--accent2); border-color:rgba(98,230,201,.4)}
+  .badge.live{color:var(--warn); border-color:rgba(255,207,92,.35)}
+  .live-dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--warn); margin-right:.4rem; animation:blink 2.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+  .center{pointer-events:none; text-align:center}
+  h1{font-size:clamp(1.4rem,4vw,2.6rem); font-weight:600; letter-spacing:.04em}
+  h1 .cog{color:var(--accent); font-family:var(--mono)}
+  .sub{font-family:var(--mono); color:var(--dim); font-size:.82rem; letter-spacing:.22em; text-transform:uppercase; margin-top:.6rem}
+  .sub b{color:var(--accent2); font-weight:700}
+
+  .bottom{display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap}
+  .hint{font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--dim); line-height:1.8}
+  .hint .key{border:1px solid var(--line); border-radius:6px; padding:.1rem .45rem; color:var(--ink); background:var(--glass)}
+
+  .warnings{position:fixed; left:2rem; right:2rem; bottom:2rem; z-index:20; display:flex; gap:.6rem; flex-direction:column; font-family:var(--mono); font-size:.68rem; letter-spacing:.08em; line-height:1.7; pointer-events:none}
+  .warnings .w{color:var(--warn); border-left:2px solid var(--warn); padding:.3rem .8rem; background:var(--glass); border-radius:0 8px 8px 0; opacity:0; transform:translateY(6px); transition:opacity .5s, transform .5s; pointer-events:none}
+  .warnings .w.show{opacity:1; transform:none}
+
+  noscript .nojs{position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; background:var(--bg); color:var(--ink); font-family:var(--mono); text-align:center; padding:2rem}
+  .nojs h2{color:var(--warn); letter-spacing:.2em; margin-bottom:1rem; font-size:1.1rem}
+
+  @media (max-width:640px){
+    .ui{padding:1.1rem 1.2rem 1.4rem}
+    .warnings{left:1.2rem; right:1.2rem; bottom:1.2rem}
+    .bottom{flex-direction:column; align-items:flex-start; gap:.8rem}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important; transition:none!important}
+  }
+</style>
+</head>
+<body>
+<div id="stage" aria-hidden="true"></div>
+
+<div class="ui">
+  <div class="top">
+    <div class="wordmark">music<b>.vaked</b>.dev</div>
+    <div class="badges">
+      <span class="badge live"><span class="live-dot"></span>broadcasting</span>
+      <span class="badge">0 + 1</span>
+      <span class="badge on">sphere</span>
+      <span class="badge" id="badge-audio">audio — tap to start</span>
+    </div>
+  </div>
+
+  <div class="center">
+    <h1>an intergalactic <span class="cog">cogito ergo sum</span> TV</h1>
+    <div class="sub">a screen with no input · it broadcasts <b>itself</b></div>
+  </div>
+
+  <div class="bottom">
+    <div class="hint">
+      <span class="key">tap / click</span> to start the signal · drag to turn the sphere<br>
+      energy spreads the constellation · <span class="key">SPREAD SPHERE ALL</span> · <span class="key">INTO LOVE</span>
+    </div>
+    <div class="wordmark" style="text-align:right">AGPL-3.0 · self-generated, from the void</div>
+  </div>
+</div>
+
+<div class="warnings" id="warnings">
+  <div class="w" id="w-autoplay">audio needs a tap to start — your browser gates the tv’s signal.</div>
+  <div class="w" id="w-webaudio">Web Audio is unavailable here — the sphere will still breathe, but silent.</div>
+  <div class="w" id="w-webgl">WebGL is unavailable — falling back to a 2D constellation.</div>
+  <div class="w" id="w-motion">reduced motion is on — the sphere still spreads, gently.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<noscript>
+  <div class="nojs">
+    <div>
+      <h2>the tv is on, but the signal needs javascript</h2>
+      <p>this screen generates its own broadcast — scripts must run.</p>
+    </div>
+  </div>
+</noscript>
+<script>
+"use strict";
+/* eslint-disable no-undef */
+
+/* ═══ energy contract (frozen in P2, implemented by P3) ═══════════════
+   window.__energy is the single source of truth shared by sphere + audio.
+   - energy ∈ [0,1], updated per animation frame (≈60 Hz).
+   - IDLE_BASELINE ≈ 0.15 — a powered screen is never truly silent; the
+     sphere self-broadcasts at baseline even with no audio energy.
+   - primary signal: analyser RMS / band energy (getByteFrequencyData).
+     the tempo LFO is secondary (it tracks periodicity, not dynamics).
+   P2 (sphere) consumes window.__energy. P3 (audio) produces it.          */
+window.__energy = { value: 0.15, rms: 0, band: 0, tempo: 0 };
+const ENERGY = window.__energy;
+const IDLE_BASELINE = 0.15;
+
+const stage = document.getElementById("stage");
+const warnings = document.getElementById("warnings");
+const badgeAudio = document.getElementById("badge-audio");
+
+function warn(id) {
+  const el = document.getElementById(id);
+  if (el && !el.classList.contains("show")) {
+    el.classList.add("show");
+    setTimeout(() => el.classList.remove("show"), 9000);
+  }
+}
+
+/* ═══ detection + warnings ═══════════════════════════════════════════ */
+const hasWebAudio = !!(window.AudioContext || window.webkitAudioContext);
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+window.engine = {
+  contract: { energy: ENERGY, IDLE_BASELINE },
+  /* P2 fills: initSphere(), setSpread(t), render(dt, t) */
+  /* P3 fills: initAudio(), start(), stop(), getRMS() */
+  initSphere: null, render: null,
+  initAudio: null, start: null, stop: null,
+  selftest() {
+    const r = { energy: ENERGY.value, idle: IDLE_BASELINE };
+    return r;
+  }
+};
+
+function boot() {
+  if (reducedMotion) warn("w-motion");
+  if (!hasWebAudio) warn("w-webaudio");
+  else warn("w-autoplay");
+
+  if (window.THREE && typeof engine.initSphere === "function") {
+    try { engine.initSphere(stage); }
+    catch (err) { warn("w-webgl"); engine.threeFailed = true; console.warn(err); }
+  } else if (!window.THREE) {
+    warn("w-webgl");
+  }
+
+  const firstTap = () => {
+    if (engine.initAudio) {
+      try { engine.initAudio(); }
+      catch (err) { warn("w-webaudio"); console.warn(err); }
+    }
+    if (engine.start) engine.start();
+    if (hasWebAudio) {
+      badgeAudio.textContent = "audio — on";
+      badgeAudio.classList.add("on");
+    }
+    window.removeEventListener("pointerdown", firstTap);
+    window.removeEventListener("keydown", firstTap);
+  };
+  window.addEventListener("pointerdown", firstTap);
+  window.addEventListener("keydown", firstTap);
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (engine.render) engine.render(dt, now / 1000);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+</script>
+</body>
+</html>
