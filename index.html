@@ -325,6 +325,275 @@
 "use strict";
 /* eslint-disable no-undef */
 
+/* ═══ P3 — THE AUDIO ENGINE (INTO LOVE) ════════════════════════════════
+   SPDX-License-Identifier: AGPL-3.0-only
+   Source: https://github.com/peterlodri-sec/music.vaked.dev
+
+   A self-generated love-diatonic signal: I–vi–IV–V in A major, played
+   by slow triangle pads, a wandering pentatonic melody and a warm sine
+   bass — all synthesized live from a seeded LCG voice. No samples, no
+   assets, no backend.
+
+   The analyser's low-mid band (100–2000 Hz) is the primary energy
+   signal; a tempo LFO is secondary. window.__energy is mutated IN
+   PLACE each animation frame (via the wrapped engine.render below),
+   never replaced — the frozen P2 contract is preserved.
+   engine.schedule() is the pure, node-testable seam.                   */
+(function () {
+  "use strict";
+
+  window.engine = window.engine || {};
+
+  /* ── identity: the voice is seeded, deterministic, reproducible ── */
+  const SEED = 42;
+  const BPM = 76;                       // gentle love-tempo (~72–88)
+  const BEAT = 60 / BPM;
+  const SIXTEENTH = BEAT / 4;
+  const BARS = 4;                       // I vi IV V → 4 bars, 64 sixteenths
+  const STEPS = BARS * 16;
+  const LOOKAHEAD = 0.12;               // schedule this far ahead (s)
+  const INTERVAL = 25;                  // scheduler poll interval (ms)
+  const IDLE = 0.15;                    // must track the frozen contract
+
+  /* A major, warmth kept in the low-mid register. Roots feed the bass,
+     chord tones feed the pads. */
+  const PROGRESSION = [
+    { name: "I  A",    root: 45, pad: [45, 49, 52] },  // A2  C#3 E3
+    { name: "vi F#m",  root: 42, pad: [42, 45, 49] },  // F#2 A2  C#3
+    { name: "IV D",    root: 38, pad: [50, 54, 57] },  // D2  D3  F#3 A3
+    { name: "V  E",    root: 40, pad: [40, 44, 47] },  // E2  G#2 B2
+  ];
+  const PENTA = [0, 2, 4, 7, 9];        // A-major pentatonic for the melody
+  const MELODY_BASE = 69;               // A4
+
+  /* ── seeded LCG — the whole instrument is one deterministic voice ── */
+  function makeLCG(seed) {
+    let s = (seed >>> 0) || SEED;
+    return function () {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  }
+  const rng = makeLCG(SEED);
+
+  /* ── pure scheduler seam (node-testable: no ctx, no AudioContext) ──
+     Returns the note times, in beats, for one bar of the progression:
+     pad hits on the four beats, bass on the offbeats, and a seeded
+     melody scatter over the sixteenth grid. Strictly increasing and
+     finite; same seed → same array.                                      */
+  function schedule(seed) {
+    const r = makeLCG(seed === undefined ? SEED : seed);
+    const times = [];
+    for (let b = 0; b < 4; b++) times.push(b);            // pad + bass root
+    for (let e = 1; e < 8; e += 1) times.push(e * 0.5);   // bass offbeats
+    for (let i = 0; i < 16; i++) {
+      if (r() < 0.5) times.push(i * 0.25);                // melody scatter
+    }
+    times.sort(function (a, b) { return a - b; });
+    const out = [];
+    for (let i = 0; i < times.length; i++) {
+      const t = times[i];
+      if (i === 0 || t > out[out.length - 1]) out.push(t);
+    }
+    return out;
+  }
+
+  /* ── engine state ── */
+  let ctx = null, master = null, comp = null, analyser = null;
+  let freqData = null, timeData = null;
+  let timer = null, step = 0, nextT = 0, playing = false;
+
+  function midiFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+  function getEnergy() {
+    return window.__energy || { value: IDLE, rms: 0, band: 0, tempo: 0 };
+  }
+
+  /* ── the voice: one oscillator + one envelope, through the master ── */
+  function voice(type, midi, t, dur, peak, attack, release) {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.value = midiFreq(midi);
+    o.connect(g);
+    g.connect(master);
+    const a = attack === undefined ? 0.02 : attack;
+    const r = release === undefined ? 0.12 : release;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(peak, t + a);
+    g.gain.setValueAtTime(peak, t + dur - r);
+    g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+
+  const pad = function (chord, t) {
+    for (let i = 0; i < chord.length; i++) {
+      voice("triangle", chord[i], t, 4 * BEAT, 0.055, 0.9, 1.2);
+      voice("sine", chord[i] + 12, t, 4 * BEAT, 0.030, 0.9, 1.2);
+    }
+  };
+  const bass = function (root, t) {
+    voice("sine", root - 12, t, BEAT * 0.9, 0.30, 0.02, 0.10);
+    voice("sine", root, t, BEAT * 0.9, 0.10, 0.02, 0.10);
+  };
+  const melody = function (t, dur) {
+    const deg = PENTA[(rng() * PENTA.length) | 0];
+    const oct = rng() > 0.8 ? 12 : 0;
+    voice("triangle", MELODY_BASE + deg + oct, t, dur, 0.09, 0.03, 0.18);
+  };
+
+  const BASS_PAT = [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0];
+
+  function scheduleStep(s, t) {
+    const bar = (s / 16) | 0;
+    const s16 = s % 16;
+    const prog = PROGRESSION[bar % PROGRESSION.length];
+    if (s16 === 0) pad(prog.pad, t);              // chord on the bar
+    if (BASS_PAT[s16]) bass(prog.root, t);        // warm bass line
+    if (rng() < 0.3) melody(t, SIXTEENTH * 2);    // wandering melody
+  }
+
+  function tick() {
+    if (!playing || !ctx) return;
+    while (nextT < ctx.currentTime + LOOKAHEAD) {
+      scheduleStep(step, nextT);
+      nextT += SIXTEENTH;
+      step = (step + 1) % STEPS;
+    }
+    timer = setTimeout(tick, INTERVAL);
+  }
+
+  /* ── public surface ── */
+  function initAudio() {
+    if (ctx) return ctx;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    try {
+      ctx = new AC();
+      if (ctx.state === "suspended") {
+        try { ctx.resume(); } catch (e) {}       // called inside a gesture
+      }
+      master = ctx.createGain();
+      master.gain.value = 1.0;
+      comp = ctx.createDynamicsCompressor();
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
+      analyser.connect(ctx.destination);
+      master.connect(comp);
+      comp.connect(analyser);                    // master → comp → analyser → out
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+      timeData = new Uint8Array(analyser.frequencyBinCount);
+    } catch (err) {
+      ctx = null; master = null; comp = null; analyser = null;
+      freqData = null; timeData = null;
+      console.warn("initAudio:", err);
+      return null;
+    }
+    return ctx;
+  }
+
+  function start() {
+    if (!ctx) initAudio();
+    if (!ctx) return;
+    if (ctx.state === "suspended") {
+      try { ctx.resume(); } catch (e) {}
+    }
+    clearTimeout(timer);
+    playing = true;
+    step = 0;
+    nextT = ctx.currentTime + 0.1;
+    timer = setTimeout(tick, INTERVAL);
+  }
+
+  function stop() {
+    clearTimeout(timer);
+    timer = null;
+    playing = false;
+    if (ctx && master) {
+      try {
+        const now = ctx.currentTime;
+        master.gain.cancelScheduledValues(now);
+        master.gain.setValueAtTime(master.gain.value, now);
+        master.gain.linearRampToValueAtTime(0.0001, now + 0.4);
+      } catch (err) { console.warn("stop ramp:", err); }
+      const c = ctx;
+      setTimeout(function () { try { c.close(); } catch (err) {} }, 450);
+      ctx = null; master = null; comp = null; analyser = null;
+      freqData = null; timeData = null;
+    }
+  }
+
+  function getRMS() { return getEnergy().rms || 0; }
+
+  /* introspection for console/debug/smoke — no state is created here */
+  function audioState() {
+    return {
+      state: ctx ? ctx.state : null,
+      analyser: !!analyser,
+      sampleRate: ctx ? ctx.sampleRate : 0,
+      playing: playing,
+      step: step,
+    };
+  }
+
+  /* ── per-frame energy: primary = low-mid band energy (100–2000 Hz),
+     secondary = tempo LFO. Mutates window.__energy IN PLACE — never
+     replaces it. Floored at IDLE so a silent screen still self-   
+     broadcasts. Wired into the P2 render loop via the wrapper below.   */
+  function updateEnergy(dt, t) {
+    const E = getEnergy();
+    let band = 0, rms = 0;
+    if (ctx && analyser && freqData && timeData) {
+      analyser.getByteTimeDomainData(timeData);
+      let acc = 0;
+      for (let i = 0; i < timeData.length; i++) {
+        const v = (timeData[i] - 128) / 128;
+        acc += v * v;
+      }
+      rms = Math.sqrt(acc / timeData.length);
+      analyser.getByteFrequencyData(freqData);
+      const N = freqData.length;
+      const binHz = ctx.sampleRate / analyser.fftSize;
+      const lo = Math.max(1, Math.floor(100 / binHz));
+      const hi = Math.min(N, Math.ceil(2000 / binHz));
+      let sum = 0;
+      for (let i = lo; i < hi; i++) sum += freqData[i];
+      band = hi > lo ? sum / ((hi - lo) * 255) : 0;
+    }
+    const lfo = 0.5 + 0.5 * Math.sin(t * (BPM / 60) * Math.PI * 2);
+    E.rms = rms;
+    E.band = band;
+    E.tempo = lfo;
+    const dyn = Math.min(1, band);
+    const lift = Math.pow(dyn, 0.7) * (0.7 + 0.3 * lfo);
+    let v = IDLE + (1 - IDLE) * lift;
+    v = Math.max(v, IDLE + 0.06 * lfo);            // beat pulse, even silent
+    E.value = Math.min(1, v);
+  }
+
+  /* hook into the existing render loop: the audio engine drives the
+     energy field the P2 sphere consumes — one call per animation frame */
+  const p2Render = window.engine.render;
+  window.engine.render = function (dt, t) {
+    try { updateEnergy(dt, t); } catch (err) { console.warn("energy:", err); }
+    if (p2Render) return p2Render(dt, t);
+  };
+
+  window.engine.initAudio = initAudio;
+  window.engine.start = start;
+  window.engine.stop = stop;
+  window.engine.schedule = schedule;
+  window.engine.getRMS = getRMS;
+  window.engine.audioState = audioState;
+})();
+</script>
+
+<script>
+"use strict";
+/* eslint-disable no-undef */
+
 /* ═══ energy contract (frozen in P2, implemented by P3) ═══════════════
    window.__energy is the single source of truth shared by sphere + audio.
    - energy ∈ [0,1], updated per animation frame (≈60 Hz).
