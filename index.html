@@ -351,7 +351,7 @@
   const SIXTEENTH = BEAT / 4;
   const BARS = 4;                       // I vi IV V → 4 bars, 64 sixteenths
   const STEPS = BARS * 16;
-  const LOOKAHEAD = 0.12;               // schedule this far ahead (s)
+  const LOOKAHEAD = 0.35;               // schedule this far ahead (s)
   const INTERVAL = 25;                  // scheduler poll interval (ms)
   const IDLE = 0.15;                    // must track the frozen contract
 
@@ -449,25 +449,35 @@
     voice("triangle", MELODY_BASE + deg + oct, t, dur, 0.09, 0.03, 0.18);
   };
 
-  const BASS_PAT = [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0];
-
   function scheduleStep(s, t) {
     const bar = (s / 16) | 0;
     const s16 = s % 16;
     const prog = PROGRESSION[bar % PROGRESSION.length];
+    const plan = barPlan();                       // deterministic per seed
     if (s16 === 0) pad(prog.pad, t);              // chord on the bar
-    if (barPlan.bassAt && barPlan.bassAt[s16]) bass(prog.root, t);   // warm bass line
-    if (barPlan.melAt && barPlan.melAt[s16]) melody(t, SIXTEENTH * 2); // melody scatter
+    if (plan.bassAt[s16]) bass(prog.root, t);     // warm bass line
+    if (plan.melAt[s16]) melody(t, SIXTEENTH * 2); // melody scatter
   }
 
   function tick() {
     if (!playing || !ctx) return;
+    if (ctx.state !== "running") {                // suspended → retry shortly
+      timer = setTimeout(tick, INTERVAL);
+      return;
+    }
+    if (nextT < ctx.currentTime) nextT = ctx.currentTime;  // stall self-heal
     while (nextT < ctx.currentTime + LOOKAHEAD) {
       scheduleStep(step, nextT);
       nextT += SIXTEENTH;
       step = (step + 1) % STEPS;
     }
     timer = setTimeout(tick, INTERVAL);
+  }
+
+  function onVisibility() {
+    if (ctx && ctx.state === "suspended" && playing) {
+      try { ctx.resume(); } catch (e) {}
+    }
   }
 
   /* ── public surface ── */
@@ -509,14 +519,20 @@
     clearTimeout(timer);
     playing = true;
     step = 0;
-    nextT = ctx.currentTime + 0.1;
+    nextT = Math.max(ctx.currentTime + 0.1, ctx.currentTime);
     timer = setTimeout(tick, INTERVAL);
+    if (typeof document !== "undefined" && document.addEventListener) {
+      document.addEventListener("visibilitychange", onVisibility);
+    }
   }
 
   function stop() {
     clearTimeout(timer);
     timer = null;
     playing = false;
+    if (typeof document !== "undefined" && document.removeEventListener) {
+      document.removeEventListener("visibilitychange", onVisibility);
+    }
     if (ctx && master) {
       try {
         const now = ctx.currentTime;
@@ -591,6 +607,7 @@
   window.engine.start = start;
   window.engine.stop = stop;
   window.engine.schedule = schedule;
+  window.engine.__barPlan = barPlan;   // the shared planner, exposed for the selftest
   window.engine.getRMS = getRMS;
   window.engine.audioState = audioState;
 })();

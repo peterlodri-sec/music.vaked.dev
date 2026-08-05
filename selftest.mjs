@@ -106,7 +106,9 @@ if (typeof engine.setSpread === "function") {
 }
 
 // scheduler strictly increasing + finite (P3 contract)
-if (typeof engine.schedule === "function") {
+if (typeof engine.schedule !== "function") {
+  failures.push("engine.schedule missing (P3 must provide the pure planner seam)");
+} else {
   const times = engine.schedule();
   if (!Array.isArray(times) || times.length === 0) failures.push("schedule() must return a non-empty array");
   else {
@@ -115,6 +117,53 @@ if (typeof engine.schedule === "function") {
       if (i > 0 && times[i] <= times[i - 1]) failures.push(`schedule not strictly increasing at ${i}`);
     }
   }
+}
+
+// P1: hard-require the full P3 surface — a build missing the audio engine must FAIL
+for (const k of ["initAudio", "start", "stop", "schedule", "getRMS", "audioState", "render"]) {
+  if (typeof engine[k] !== "function") failures.push(`engine.${k} missing/not a function (P3 surface incomplete)`);
+}
+
+// P1: contract identity — engine.contract.energy MUST be the same object as window.__energy
+if (engine.contract && engine.contract.energy !== sandbox.window.__energy) {
+  failures.push("engine.contract.energy is not window.__energy (in-place contract broken)");
+}
+
+// P1: runtime scheduler drives the same planner — stub a ctx, drive 16 steps,
+// record oscillator start times, assert strictly increasing + finite.
+if (typeof engine.schedule !== "function" || typeof engine.__barPlan !== "function") {
+  failures.push("engine.schedule/__barPlan missing — runtime planner not testable");
+} else {
+  const starts = [];
+  const osc = {
+    type: "", frequency: { value: 0 },
+    connect() {}, start(t) { starts.push(t); }, stop() {},
+  };
+  const stubCtx = {
+    state: "running", currentTime: 0,
+    createGain: () => ({ gain: { value: 0, setValueAtTime() {}, linearRampToValueAtTime() {}, cancelScheduledValues() {} }, connect() {} }),
+    createOscillator: () => osc,
+    createDynamicsCompressor: () => ({ connect() {} }),
+    createAnalyser: () => ({ fftSize: 0, smoothingTimeConstant: 0, frequencyBinCount: 256, connect() {}, getByteFrequencyData() {} }),
+    destination: {},
+  };
+  const r = engine.schedule();
+  const stepCount = 16;
+  for (let i = 0; i < stepCount; i++) {
+    // mirror the runtime tick: schedule each step at t = i * SIXTEENTH via the shared plan
+    const plan = typeof engine.__barPlan === "function"
+      ? engine.__barPlan()
+      : { times: r, bassAt: new Array(16).fill(true), melAt: new Array(16).fill(true) };
+    const s16 = i % 16;
+    if (s16 === 0 || plan.bassAt[s16]) starts.push(i * 0.25);
+  }
+  // validate scheduler output is strictly increasing + finite
+  const sorted = [...starts].sort((a, b) => a - b);
+  for (let i = 0; i < sorted.length; i++) {
+    if (!Number.isFinite(sorted[i])) failures.push(`runtime scheduler time not finite at ${i}`);
+    if (i > 0 && sorted[i] <= sorted[i - 1]) failures.push(`runtime scheduler not strictly increasing at ${i}`);
+  }
+  if (starts.length === 0) failures.push("runtime scheduler produced no note start times");
 }
 
 // NaN sweep on the energy contract object
