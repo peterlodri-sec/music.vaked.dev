@@ -141,6 +141,169 @@
 "use strict";
 /* eslint-disable no-undef */
 
+/* ═══ P2 — THE SPHERE (SPREAD SPHERE ALL) ═════════════════════════════
+   The constellation is the same intrinsic 2D surface (a Fibonacci-seeded
+   particle shell) unfolding outward in 3D as energy rises. "Spread" is a
+   radial displacement h(θ,φ,energy) along each particle's ambient normal:
+   at IDLE_BASELINE the shell is a tight sphere; as energy → 1 it unfolds
+   into a 3D-looking constellation. The powered screen is never still:
+   idle drift + slow rotation live even when silent.                    */
+(function () {
+  "use strict";
+
+  let scene, camera, renderer, points, geo, material;
+  let base = [];            // {x,y,z} unit-vector base position on the sphere
+  let phase = [];           // per-particle drift phase
+  let rotY = 0, rotX = 0, spin = 0;
+  let drag = false, dx = 0, dy = 0, targetRotY = 0, targetRotX = 0;
+  let n = 2048, spreadNow = 0;
+
+  /* pure spread curve — frozen contract: monotonic in energy ∈ [0,1], returns a number */
+  function setSpread(energy) {
+    const e = Math.max(0, Math.min(1, energy));
+    // baseline → unfolded: smooth sigmoid-ish ramp, normalized to [0,1]
+    const s = Math.pow(e, 0.7);
+    spreadNow = s;
+    return s;
+  }
+
+  function fibonacciSphere(count) {
+    const phi = (1 + Math.sqrt(5)) / 2;
+    const pts = [];
+    for (let i = 0; i < count; i++) {
+      const y = 1 - (i / (count - 1)) * 2;                 // -1..1
+      const rad = Math.sqrt(Math.max(0, 1 - y * y));
+      const theta = 2 * Math.PI * i / phi;
+      pts.push({ x: rad * Math.cos(theta), y, z: rad * Math.sin(theta) });
+    }
+    return pts;
+  }
+
+  function initSphere(stageEl) {
+    if (!window.THREE) return false;
+
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const small = Math.min(window.innerWidth, window.innerHeight) < 520;
+    if (isReduced) n = 768;
+    else if (small) n = 1024;
+    else n = Math.round(2048 * Math.min(dpr, 1.5));
+
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 9;
+
+    renderer = new THREE.WebGLRenderer({ antialias: !isReduced, alpha: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(dpr);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    stageEl.appendChild(renderer.domElement);
+
+    // background constellation field
+    const fieldGeo = new THREE.BufferGeometry();
+    const fcount = 600;
+    const fpos = new Float32Array(fcount * 3);
+    for (let i = 0; i < fcount; i++) {
+      fpos[i * 3] = (Math.random() - 0.5) * 40;
+      fpos[i * 3 + 1] = (Math.random() - 0.5) * 40;
+      fpos[i * 3 + 2] = (Math.random() - 0.5) * 40;
+    }
+    fieldGeo.setAttribute("position", new THREE.BufferAttribute(fpos, 3));
+    const fieldMat = new THREE.PointsMaterial({
+      color: 0x62e6c9, size: 0.03, transparent: true, opacity: 0.35,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    const field = new THREE.Points(fieldGeo, fieldMat);
+    scene.add(field);
+
+    // the main sphere shell
+    base = fibonacciSphere(n);
+    phase = [];
+    const positions = new Float32Array(n * 3);
+    const colors = new Float32Array(n * 3);
+    const cA = new THREE.Color(0xb48bff);
+    const cB = new THREE.Color(0x62e6c9);
+    const cC = new THREE.Color(0xe7e2f7);
+    for (let i = 0; i < n; i++) {
+      phase.push(Math.random() * Math.PI * 2);
+      positions[i * 3] = base[i].x;
+      positions[i * 3 + 1] = base[i].y;
+      positions[i * 3 + 2] = base[i].z;
+      const t = i / n;
+      const c = (t < 0.5) ? cA.clone().lerp(cB, t * 2) : cB.clone().lerp(cC, (t - 0.5) * 2);
+      colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
+    }
+    geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    material = new THREE.PointsMaterial({
+      size: 0.07, vertexColors: true, transparent: true, opacity: 0.92,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    points = new THREE.Points(geo, material);
+    scene.add(points);
+
+    // pointer drag → rotate the constellation (a hint; it keeps its own life)
+    window.addEventListener("pointerdown", (ev) => {
+      drag = true; dx = ev.clientX; dy = ev.clientY;
+      ev.preventDefault();
+    });
+    window.addEventListener("pointermove", (ev) => {
+      if (!drag) return;
+      const nx = ev.clientX - dx, ny = ev.clientY - dy;
+      dx = ev.clientX; dy = ev.clientY;
+      targetRotY += nx * 0.005;
+      targetRotX += ny * 0.005;
+    });
+    window.addEventListener("pointerup", () => { drag = false; });
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    return true;
+  }
+
+  function render(dt, t) {
+    if (!points || !geo) return;
+    const energy = window.__energy ? window.__energy.value : IDLE_BASELINE;
+    const spread = setSpread(energy);
+
+    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const arr = geo.attributes.position.array;
+    const R = 2.1;                       // sphere radius
+    const maxR = R * (1 + 1.35 * spread); // unfold outward with energy
+    const idleSway = isReduced ? 0 : 0.03;
+    const drift = isReduced ? 0 : 0.05;
+    for (let i = 0; i < n; i++) {
+      const b = base[i];
+      const sway = Math.sin(t * 0.6 + phase[i]) * idleSway + Math.sin(t * 0.23 + phase[i] * 1.7) * drift;
+      const r = maxR * (1 + sway * Math.sin(phase[i] * 3 + energy * 6));
+      arr[i * 3] = b.x * r;
+      arr[i * 3 + 1] = b.y * r;
+      arr[i * 3 + 2] = b.z * r;
+    }
+    geo.attributes.position.needsUpdate = true;
+
+    spin += dt * (isReduced ? 0.05 : 0.18);
+    rotY += (targetRotY - rotY) * Math.min(1, dt * 6);
+    rotX += (targetRotX - rotX) * Math.min(1, dt * 6);
+    points.rotation.y = spin + rotY;
+    points.rotation.x = rotX;
+    if (renderer && scene && camera) renderer.render(scene, camera);
+  }
+
+  window.engine = window.engine || {};
+  window.engine.initSphere = initSphere;
+  window.engine.render = render;
+  window.engine.setSpread = setSpread;
+})();
+</script>
+
+<script>
+"use strict";
+/* eslint-disable no-undef */
+
 /* ═══ energy contract (frozen in P2, implemented by P3) ═══════════════
    window.__energy is the single source of truth shared by sphere + audio.
    - energy ∈ [0,1], updated per animation frame (≈60 Hz).
@@ -169,7 +332,7 @@ function warn(id) {
 const hasWebAudio = !!(window.AudioContext || window.webkitAudioContext);
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-window.engine = {
+window.engine = Object.assign(Object.create(null), {
   contract: { energy: ENERGY, IDLE_BASELINE },
   /* P2 fills: initSphere(), setSpread(t), render(dt, t) */
   /* P3 fills: initAudio(), start(), stop(), getRMS() */
@@ -179,7 +342,7 @@ window.engine = {
     const r = { energy: ENERGY.value, idle: IDLE_BASELINE };
     return r;
   }
-};
+}, window.engine || {});
 
 function boot() {
   if (reducedMotion) warn("w-motion");
