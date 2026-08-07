@@ -83,6 +83,13 @@
   .support .pay a{color:var(--accent2); text-decoration:none; border:1px solid rgba(98,230,201,.3); border-radius:6px; padding:.22rem .6rem; transition:background .15s, border-color .15s; background:rgba(98,230,201,.05)}
   .support .pay a:hover{background:rgba(98,230,201,.14); border-color:var(--accent2)}
 
+  /* the rest of the network — the constellation */
+  .const{font-family:var(--mono); font-size:.62rem; letter-spacing:.16em; color:var(--dim); text-transform:uppercase; line-height:1.9; border:1px solid var(--line); border-radius:10px; padding:.7rem 1rem; background:var(--glass); backdrop-filter:blur(8px); text-align:right}
+  .const .h{color:var(--accent)}
+  .const .pay{display:flex; gap:.5rem; justify-content:flex-end; flex-wrap:wrap; margin-top:.4rem}
+  .const .pay a{color:var(--accent); text-decoration:none; border:1px solid rgba(180,139,255,.3); border-radius:6px; padding:.22rem .6rem; transition:background .15s, border-color .15s; background:rgba(180,139,255,.05)}
+  .const .pay a:hover{background:rgba(180,139,255,.14); border-color:var(--accent)}
+
   .warnings{position:fixed; left:2rem; right:2rem; bottom:2rem; z-index:20; display:flex; gap:.6rem; flex-direction:column; font-family:var(--mono); font-size:.68rem; letter-spacing:.08em; line-height:1.7; pointer-events:none}
   .warnings .w{color:var(--warn); border-left:2px solid var(--warn); padding:.3rem .8rem; background:var(--glass); border-radius:0 8px 8px 0; opacity:0; transform:translateY(6px); transition:opacity .5s, transform .5s; pointer-events:none}
   .warnings .w.show{opacity:1; transform:none}
@@ -131,6 +138,16 @@
         <a href="https://github.com/sponsors/peterlodri-sec" target="_blank" rel="noopener">github sponsor</a>
         <a href="https://revolut.me/peterjs8be" target="_blank" rel="noopener">revolut</a>
         <a href="https://wise.com/pay/business/lodripeterjozsef" target="_blank" rel="noopener">wise</a>
+      </div>
+    </div>
+    <div class="const">
+      <div class="h">the constellation</div>
+      <div class="pay">
+        <a href="https://music.vaked.dev/" target="_blank" rel="noopener">music</a>
+        <a href="https://mlxquantlovefrom.com/" target="_blank" rel="noopener">quant-love</a>
+        <a href="https://proposal.vaked.dev/" target="_blank" rel="noopener">proposal</a>
+        <a href="https://pocoo.vaked.dev/" target="_blank" rel="noopener">pocoo</a>
+        <a href="https://art.vaked.dev/" target="_blank" rel="noopener">art</a>
       </div>
     </div>
   </div>
