@@ -80,6 +80,13 @@
   .support{font-family:var(--mono); font-size:.62rem; letter-spacing:.16em; color:var(--dim); text-transform:uppercase; line-height:1.9; border:1px solid var(--line); border-radius:10px; padding:.7rem 1rem; background:var(--glass); backdrop-filter:blur(8px); text-align:right}
   .support .h{color:var(--accent2)}
   .support .pay{display:flex; gap:.5rem; justify-content:flex-end; flex-wrap:wrap; margin-top:.4rem}
+  /* volume slider — the signal level */
+  .volume{display:flex; align-items:center; gap:.55rem; font-family:var(--mono); font-size:.64rem; letter-spacing:.14em; color:var(--dim); pointer-events:auto}
+  .volume .vlabel{text-transform:uppercase}
+  .volume input[type=range]{-webkit-appearance:none; width:110px; height:22px; background:transparent; cursor:pointer}
+  .volume input[type=range]::-webkit-slider-runnable-track{height:3px; background:var(--line); border-radius:2px}
+  .volume input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:var(--accent2); margin-top:-5px; box-shadow:0 0 10px rgba(98,230,201,.5)}
+  .volume .vval{color:var(--accent2); width:1.4em; text-align:right}
   .support .pay a{color:var(--accent2); text-decoration:none; border:1px solid rgba(98,230,201,.3); border-radius:6px; padding:.22rem .6rem; transition:background .15s, border-color .15s; background:rgba(98,230,201,.05)}
   .support .pay a:hover{background:rgba(98,230,201,.14); border-color:var(--accent2)}
 
@@ -132,6 +139,16 @@
       energy spreads the constellation · <span class="key">SPREAD SPHERE ALL</span> · <span class="key">INTO LOVE</span>
     </div>
     <div class="wordmark" style="text-align:right">AGPL-3.0 · self-generated, from the void</div>
+    <div class="volume" id="volumeWrap">
+      <span class="vlabel">vol</span>
+      <input type="range" id="volume" min="0" max="100" value="70" aria-label="signal volume">
+      <span class="vval" id="volVal">70</span>
+    </div>
+    <div class="volume" id="zoomWrap" title="POV — behind eBPF, from within, by unknown POV">
+      <span class="vlabel">zoom</span>
+      <input type="range" id="zoom" min="2" max="10" step="0.1" value="9" aria-label="sphere POV zoom">
+      <span class="vval" id="zoomVal">9</span>
+    </div>
     <div class="support">
       <div class="h">the lovetta lane</div>
       <div class="pay">
@@ -351,6 +368,8 @@
   window.engine.__sphereRender = render;
   window.engine.render = render;
   window.engine.setSpread = setSpread;
+  window.engine.setZoom = function (z) { if (camera) camera.position.z = z; };
+  window.engine.__sphereCam = camera;
 })();
 </script>
 
@@ -543,8 +562,7 @@
       }
       master = ctx.createGain();
       master.gain.value = 1.0;
-      comp = ctx.createDynamicsCompressor();
-      analyser = ctx.createAnalyser();
+      comp = ctx.createDynamicsCompressor();      analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
       analyser.smoothingTimeConstant = 0.82;
       analyser.connect(ctx.destination);
@@ -663,6 +681,9 @@
   window.engine.__barPlan = barPlan;   // the shared planner, exposed for the selftest
   window.engine.getRMS = getRMS;
   window.engine.audioState = audioState;
+  window.engine.setVolume = function (v) {
+    if (master) master.gain.setTargetAtTime(v, ctx.currentTime, 0.05);
+  };
 })();
 </script>
 
@@ -754,6 +775,35 @@ function boot() {
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
 else boot();
+
+/* ── POV controls — vol + zoom (behind eBPF, from within, by unknown POV) ── */
+(function () {
+  "use strict";
+  const vol = document.getElementById("volume");
+  const volVal = document.getElementById("volVal");
+  const zoom = document.getElementById("zoom");
+  const zoomVal = document.getElementById("zoomVal");
+
+  if (vol) {
+    vol.addEventListener("input", () => {
+      const v = Number(vol.value) / 100;
+      volVal.textContent = String(Math.round(v * 100));
+      // master.gain lives in the P3 audio module; reach it via the analyser path if exposed
+      if (window.engine && window.engine.setVolume) window.engine.setVolume(v);
+      else if (window.__audioMaster) window.__audioMaster.gain.setTargetAtTime(v, window.__audioCtx.currentTime, 0.05);
+    });
+  }
+
+  if (zoom) {
+    zoom.addEventListener("input", () => {
+      const z = Number(zoom.value);
+      zoomVal.textContent = String(z);
+      if (window.engine && window.engine.setZoom) window.engine.setZoom(z);
+      // fallback: reach the sphere camera through the engine surface
+      if (window.engine && window.engine.__sphereCam) window.engine.__sphereCam.position.z = z;
+    });
+  }
+})();
 </script>
 </body>
 </html>
