@@ -1,45 +1,29 @@
-# music.vaked.dev
+# music.vaked.dev — The Constellation Sound Node
 
-An intergalactic cogito-ergo-sum TV. A screen that is powered but receives
-no input — a universal HDMI plug lying on the carpet floor — and so it
-broadcasts its own signal from within.
+> *An intergalactic cogito-ergo-sum TV. A screen that is powered but receives no input — a universal HDMI plug lying on the carpet floor — and so it broadcasts its own signal from within.*
 
-A self-generating constellation (Three.js particle sphere) synced to a
-procedural Web Audio engine. No samples, no assets, no backend. Every note
-and every star is computed in the browser.
+Live URL: **[https://music.vaked.dev](https://music.vaked.dev)**
 
-## Concept
+---
 
-- **SPREAD SPHERE ALL** — a sphere of particles that spreads into a
-  constellation as the music's energy rises; at rest it still breathes at an
-  idle baseline (a powered screen is never truly silent).
-- **INTO LOVE** — the music is a generative love-progression: soft pads, a
-  slow melody, a warm bass, all produced live from a seeded voice.
-- **0 + 1** — the engine is a two-voice binary heart: an LFO and an analyser
-  agree on the energy that drives the sphere.
+## ✦ Overview
 
-## Build / run
+`music.vaked.dev` is the living ambient sound node of the **vaked.dev constellation**. It serves as an iframe audio-reactive background layer across `art.vaked.dev` and other ecosystem surfaces.
 
-Static site, zero build step. Open `index.html` in a browser, or:
+### Key Features
+- **Three.js Particle Sphere**: Self-generating Fibonacci particle shell that expands and contracts in resonance with the sound.
+- **Web Audio Engine**: Procedural ambient synthesis generated directly in the browser via Web Audio API—no static MP3s, zero network payload.
+- **Cross-Site Integration**: Embedded via `<iframe id="musicbg" src="https://music.vaked.dev/" ... style="mix-blend-mode:screen; opacity:0.3"></iframe>` to provide ambient atmosphere.
 
-```bash
-python3 -m http.server 8080
-# → http://localhost:8080
-```
+---
 
-## Gates
+## 🌌 Constellation Sister Sites (The Lovetta Lane)
 
-```bash
-node selftest.mjs   # node:vm gate — energy invariant, spread monotonic, no NaN
-```
+- ✦ **[art.vaked.dev](https://art.vaked.dev)**
+- ✦ **[vision-gallery (23)](https://art.vaked.dev/vision-gallery.html)**
+- ✦ **[music.vaked.dev](https://music.vaked.dev)**
+- ✦ **[quant-love](https://mlxquantlovefrom.com)**
+- ✦ **[proposal.vaked.dev](https://proposal.vaked.dev)**
+- ✦ **[pocoo.vaked.dev](https://pocoo.vaked.dev)**
 
-`node --check` on the extracted inline scripts + the `vm` selftest above are
-the project's deterministic checks.
-
-## Deploy
-
-Push-to-deploy: `.github/workflows/deploy.yml` uploads `_site/` to the
-Cloudflare Pages project `music-vaked-dev` (branch `main`), which serves
-`https://music.vaked.dev/`.
-
-AGPL-3.0. Source: https://github.com/peterlodri-sec/music.vaked.dev
+*the constellation · 0 + 1 · fine touch from within · vaked.dev*
