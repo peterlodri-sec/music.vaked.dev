@@ -169,6 +169,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
   <div class="top">
     <div class="wordmark">music<b>.vaked</b>.dev</div>
     <div class="badges">
+        <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
       <span class="badge live"><span class="live-dot"></span>broadcasting</span>
       <span class="badge">0 + 1</span>
       <span class="badge on">sphere</span>
@@ -599,6 +600,41 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
   }
 
   /* ── public surface ── */
+  
+  // ── Multi-Oscillator Polyphonic Drone Synth ───────────
+  let droneOscs = [];
+  let droneGain = null;
+
+  function initPolyphonicDrone() {
+    if (!ctx || !master || droneOscs.length > 0) return;
+    droneGain = ctx.createGain();
+    droneGain.gain.value = 0.18;
+    droneGain.connect(master);
+
+    const freqs = [108.0, 216.0, 432.0, 532.0]; // 432Hz harmonic series & sub-drone
+    const detunes = [-7, 0, +7, +12];
+
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      osc.type = idx % 2 === 0 ? "sine" : "triangle";
+      osc.frequency.value = freq;
+      osc.detune.value = detunes[idx];
+
+      if (panner) {
+        panner.pan.value = (idx - 1.5) * 0.4;
+        osc.connect(panner);
+        panner.connect(droneGain);
+      } else {
+        osc.connect(droneGain);
+      }
+
+      osc.start();
+      droneOscs.push(osc);
+    });
+    console.log("🌌 Polyphonic Drone Synth initialized (432Hz harmonic tuning)");
+  }
+
   function initAudio() {
     if (ctx) return ctx;
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -628,6 +664,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
   }
 
   function start() {
+    initPolyphonicDrone();
     if (!ctx) initAudio();
     if (!ctx) return;
     if (ctx.state === "suspended") {
