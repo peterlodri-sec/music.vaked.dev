@@ -205,6 +205,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="3">04 GHOST RIDER</span>
       <span class="badge mode-pill" data-track="4">05 ULTRA LOVE</span>
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
+      <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
       <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
       <span class="badge">0 + 1</span>
       <span class="badge" id="badge-audio">audio — tap to start</span>
@@ -218,8 +219,12 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button class="sc-close" id="sc-close-btn">&times;</button>
     </div>
     <div class="sc-search-box">
-      <input type="text" id="sc-search-input" placeholder="Search @peterlodri or track name..." value="peterlodri">
+      <input type="text" id="sc-search-input" placeholder="Search @peterlodri or 8bit-wraith..." value="peterlodri">
       <button id="sc-search-btn">Search</button>
+    </div>
+    <div style="display:flex;gap:.4rem;font-family:var(--mono);font-size:.65rem">
+      <button id="sc-preset-peter" style="background:rgba(98,230,201,.15);border:1px solid rgba(98,230,201,.3);color:#62e6c9;padding:.2rem .5rem;border-radius:4px;cursor:pointer">@peterlodri</button>
+      <button id="sc-preset-wraith" style="background:rgba(255,207,92,.15);border:1px solid rgba(255,207,92,.4);color:#ffcf5c;padding:.2rem .5rem;border-radius:4px;cursor:pointer">👾 8bit-wraith (Brother)</button>
     </div>
     <iframe id="sc-widget-frame" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/users/peterlodri&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true" width="100%" height="166" frameborder="0" allow="autoplay"></iframe>
     <div class="sc-controls">
@@ -229,7 +234,8 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
         <span class="vval" id="scVolVal" style="color:#ff5500">80</span>
       </div>
       <div>
-        <a href="https://soundcloud.com/peterlodri" target="_blank" rel="noopener">💬 Comment & Like on SC</a>
+        <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" style="color:#ffcf5c;border-color:rgba(255,207,92,.3)">👾 8bit-wraith SC</a>
+        <a href="https://soundcloud.com/peterlodri" target="_blank" rel="noopener">💬 peterlodri SC</a>
       </div>
     </div>
   </div>
@@ -1049,15 +1055,37 @@ else boot();
     scWidget = SC.Widget(scFrame);
   }
 
+  function loadUrl(targetUrl) {
+    if (!scFrame) return;
+    scFrame.src = "https://w.soundcloud.com/player/?url=" + encodeURIComponent(targetUrl) + "&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true";
+  }
+
+  const pPeter = document.getElementById("sc-preset-peter");
+  const pWraith = document.getElementById("sc-preset-wraith");
+
+  if (pPeter) {
+    pPeter.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "peterlodri";
+      loadUrl("https://soundcloud.com/peterlodri");
+    });
+  }
+  if (pWraith) {
+    pWraith.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "8bit-wraith";
+      loadUrl("https://soundcloud.com/8bit-wraith");
+    });
+  }
+
   function doSearch() {
     if (!scFrame) return;
     let q = (searchInput ? searchInput.value.trim() : "").toLowerCase();
-    if (!q) q = "peterlodri";
-    let targetUrl = "https://soundcloud.com/peterlodri";
-    if (q !== "peterlodri" && q !== "@peterlodri") {
-      targetUrl = "https://soundcloud.com/search?q=" + encodeURIComponent(q);
+    if (!q || q === "peterlodri" || q === "@peterlodri") {
+      loadUrl("https://soundcloud.com/peterlodri");
+    } else if (q === "8bit-wraith" || q === "@8bit-wraith") {
+      loadUrl("https://soundcloud.com/8bit-wraith");
+    } else {
+      loadUrl("https://soundcloud.com/search?q=" + encodeURIComponent(q));
     }
-    scFrame.src = "https://w.soundcloud.com/player/?url=" + encodeURIComponent(targetUrl) + "&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true";
   }
 
   if (searchBtn) searchBtn.addEventListener("click", doSearch);
