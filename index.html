@@ -63,6 +63,9 @@
   .badge{font-family:var(--mono); font-size:.62rem; letter-spacing:.18em; color:var(--dim); border:1px solid var(--line); border-radius:999px; padding:.3rem .7rem; background:var(--glass); backdrop-filter:blur(8px)}
   .badge.on{color:var(--accent2); border-color:rgba(98,230,201,.4)}
   .badge.live{color:var(--warn); border-color:rgba(255,207,92,.35)}
+  .mode-pill{cursor:pointer; pointer-events:auto; transition:background .15s, color .15s, border-color .15s}
+  .mode-pill:hover{background:rgba(98,230,201,.18); border-color:var(--accent2); color:var(--ink)}
+  .mode-pill.on{color:var(--accent2); border-color:rgba(98,230,201,.6); background:rgba(98,230,201,.12)}
   .live-dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--warn); margin-right:.4rem; animation:blink 2.4s infinite}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 
@@ -169,10 +172,14 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
   <div class="top">
     <div class="wordmark">music<b>.vaked</b>.dev</div>
     <div class="badges">
-        <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
       <span class="badge live"><span class="live-dot"></span>broadcasting</span>
+      <span class="badge mode-pill on" data-track="0">01 QUANTUM EYE</span>
+      <span class="badge mode-pill" data-track="1">02 SINGULARITY</span>
+      <span class="badge mode-pill" data-track="2">03 RECURSION</span>
+      <span class="badge mode-pill" data-track="3">04 GHOST RIDER</span>
+      <span class="badge mode-pill" data-track="4">05 ULTRA LOVE</span>
+      <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
       <span class="badge">0 + 1</span>
-      <span class="badge on">sphere</span>
       <span class="badge" id="badge-audio">audio — tap to start</span>
     </div>
   </div>
@@ -456,15 +463,47 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
   const INTERVAL = 25;                  // scheduler poll interval (ms)
   const IDLE = 0.15;                    // must track the frozen contract
 
-  /* A major, warmth kept in the low-mid register. Roots feed the bass,
-     chord tones feed the pads. */
-  const PROGRESSION = [
-    { name: "I  A",    root: 45, pad: [45, 49, 52] },  // A2  C#3 E3
-    { name: "vi F#m",  root: 42, pad: [42, 45, 49] },  // F#2 A2  C#3
-    { name: "IV D",    root: 38, pad: [50, 54, 57] },  // D2  D3  F#3 A3
-    { name: "V  E",    root: 40, pad: [40, 44, 47] },  // E2  G#2 B2
+  /* EP Vol. 1 Sovereign Frequencies Mode Progressions */
+  const EP_PROGRESSIONS = [
+    // 01 Quantum Galactic Eye (Fm - 145 BPM Cybernetic Diatonic)
+    [
+      { name: "i Fm",   root: 41, pad: [41, 44, 48] },
+      { name: "VI Db",  root: 37, pad: [37, 41, 44] },
+      { name: "III Ab", root: 44, pad: [44, 48, 51] },
+      { name: "VII Eb", root: 39, pad: [39, 43, 46] }
+    ],
+    // 02 Singularity Horizon (Cm - Deep Sub Bass)
+    [
+      { name: "i Cm",   root: 36, pad: [36, 39, 43] },
+      { name: "VI Ab",  root: 32, pad: [32, 36, 39] },
+      { name: "iv Fm",  root: 41, pad: [41, 44, 48] },
+      { name: "v Gm",   root: 43, pad: [43, 46, 50] }
+    ],
+    // 03 Recursion Engine (Gm - Arpeggiated Pulse)
+    [
+      { name: "i Gm",   root: 43, pad: [43, 46, 50] },
+      { name: "v Dm",   root: 38, pad: [38, 41, 45] },
+      { name: "VI Eb",  root: 39, pad: [39, 43, 46] },
+      { name: "IV C",   root: 36, pad: [48, 52, 55] }
+    ],
+    // 04 Space Ghost Rider (Dm - High Resonance)
+    [
+      { name: "i Dm",   root: 38, pad: [38, 41, 45] },
+      { name: "VII C",  root: 36, pad: [36, 40, 43] },
+      { name: "VI Bb",  root: 34, pad: [34, 38, 41] },
+      { name: "V A",    root: 45, pad: [45, 49, 52] }
+    ],
+    // 05 Ultra Love God (Am - Sovereign Elevation)
+    [
+      { name: "i Am",   root: 45, pad: [45, 48, 52] },
+      { name: "VI F",   root: 41, pad: [41, 45, 48] },
+      { name: "III C",  root: 36, pad: [36, 40, 43] },
+      { name: "VII G",  root: 43, pad: [43, 47, 50] }
+    ]
   ];
-  const PENTA = [0, 2, 4, 7, 9];        // A-major pentatonic for the melody
+  let currentTrackIdx = 0;
+
+  const PENTA = [0, 2, 4, 7, 9];        // major pentatonic for melody
   const MELODY_BASE = 69;               // A4
 
   /* ── seeded LCG — the whole instrument is one deterministic voice ── */
@@ -570,13 +609,30 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
   function scheduleStep(s, t) {
     const bar = (s / 16) | 0;
     const s16 = s % 16;
-    const prog = PROGRESSION[bar % PROGRESSION.length];
+    const activeProg = EP_PROGRESSIONS[currentTrackIdx] || EP_PROGRESSIONS[0];
+    const prog = activeProg[bar % activeProg.length];
     const plan = barPlan();                       // deterministic per seed
     if (s16 === 0) pad(prog.pad, t);              // chord on the bar
     if (s16 === 0) bonobo(prog.pad, t, prog.root); // the bonobo under-layer
     if (plan.bassAt[s16]) bass(prog.root, t);     // warm bass line
     if (plan.melAt[s16]) melody(t, SIXTEENTH * 2); // melody scatter
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const pills = document.querySelectorAll(".mode-pill");
+    pills.forEach((pill) => {
+      pill.addEventListener("click", (e) => {
+        e.stopPropagation();
+        pills.forEach((p) => p.classList.remove("on"));
+        pill.classList.add("on");
+        const idx = parseInt(pill.getAttribute("data-track") || "0", 10);
+        currentTrackIdx = idx;
+        const droneBadge = document.getElementById("drone-badge");
+        const names = ["01 QUANTUM EYE (Fm)", "02 SINGULARITY (Cm)", "03 RECURSION (Gm)", "04 GHOST RIDER (Dm)", "05 ULTRA LOVE (Am)"];
+        if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
+      });
+    });
+  });
 
   function tick() {
     if (!playing || !ctx) return;
