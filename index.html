@@ -112,9 +112,35 @@
     .warnings{left:1.2rem; right:1.2rem; bottom:1.2rem}
     .bottom{flex-direction:column; align-items:flex-start; gap:.8rem}
   }
-  @media (prefers-reduced-motion:reduce){
-    *{animation:none!important; transition:none!important}
+  /* ── SoundCloud Drawer & Mini Player Panel ───────────────────────── */
+  .sc-panel{
+    position:fixed; top:4.5rem; right:2rem; width:min(420px,90vw); z-index:30;
+    background:rgba(11,10,21,.92); border:1px solid rgba(255,85,0,.4);
+    border-radius:14px; padding:1.2rem; backdrop-filter:blur(16px);
+    box-shadow:0 8px 32px rgba(0,0,0,.6), 0 0 20px rgba(255,85,0,.15);
+    display:none; flex-direction:column; gap:.8rem; pointer-events:auto;
+    transition:opacity .25s, transform .25s;
   }
+  .sc-panel.open{display:flex}
+  .sc-header{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:.72rem; letter-spacing:.18em; color:#ff5500; text-transform:uppercase}
+  .sc-close{cursor:pointer; background:transparent; border:none; color:var(--dim); font-size:1.1rem; font-family:var(--mono)}
+  .sc-close:hover{color:#ff5500}
+  .sc-search-box{display:flex; gap:.4rem}
+  .sc-search-box input{
+    flex:1; background:rgba(255,85,0,.08); border:1px solid rgba(255,85,0,.3);
+    border-radius:8px; padding:.4rem .8rem; color:var(--ink); font-family:var(--mono); font-size:.75rem;
+    outline:none; transition:border-color .15s;
+  }
+  .sc-search-box input:focus{border-color:#ff5500}
+  .sc-search-box button{
+    background:rgba(255,85,0,.2); border:1px solid rgba(255,85,0,.5);
+    border-radius:8px; padding:.4rem .8rem; color:#ff5500; font-family:var(--mono); font-size:.7rem;
+    cursor:pointer; text-transform:uppercase; transition:background .15s;
+  }
+  .sc-search-box button:hover{background:rgba(255,85,0,.35)}
+  .sc-controls{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:.65rem; color:var(--dim)}
+  .sc-controls a{color:#ff5500; text-decoration:none; border:1px solid rgba(255,85,0,.3); border-radius:6px; padding:.2rem .5rem}
+  .sc-controls a:hover{background:rgba(255,85,0,.15)}
 </style>
 
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -178,9 +204,33 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="2">03 RECURSION</span>
       <span class="badge mode-pill" data-track="3">04 GHOST RIDER</span>
       <span class="badge mode-pill" data-track="4">05 ULTRA LOVE</span>
+      <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
       <span class="badge">0 + 1</span>
       <span class="badge" id="badge-audio">audio — tap to start</span>
+    </div>
+  </div>
+
+  <!-- SoundCloud Mini Player & Search Drawer -->
+  <div class="sc-panel" id="sc-panel">
+    <div class="sc-header">
+      <span>🎵 SoundCloud Artist & Search</span>
+      <button class="sc-close" id="sc-close-btn">&times;</button>
+    </div>
+    <div class="sc-search-box">
+      <input type="text" id="sc-search-input" placeholder="Search @peterlodri or track name..." value="peterlodri">
+      <button id="sc-search-btn">Search</button>
+    </div>
+    <iframe id="sc-widget-frame" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/users/peterlodri&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true" width="100%" height="166" frameborder="0" allow="autoplay"></iframe>
+    <div class="sc-controls">
+      <div class="volume">
+        <span class="vlabel" style="color:#ff5500">SC VOL</span>
+        <input type="range" id="sc-volume" min="0" max="100" value="80" aria-label="SoundCloud volume">
+        <span class="vval" id="scVolVal" style="color:#ff5500">80</span>
+      </div>
+      <div>
+        <a href="https://soundcloud.com/peterlodri" target="_blank" rel="noopener">💬 Comment & Like on SC</a>
+      </div>
     </div>
   </div>
 
@@ -961,6 +1011,69 @@ else boot();
       if (window.engine && window.engine.setZoom) window.engine.setZoom(z);
       // fallback: reach the sphere camera through the engine surface
       if (window.engine && window.engine.__sphereCam) window.engine.__sphereCam.position.z = z;
+    });
+  }
+})();
+</script>
+
+<!-- SoundCloud Widget API Integration -->
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script>
+(function() {
+  "use strict";
+  const toggleBtn = document.getElementById("sc-toggle-btn");
+  const panel = document.getElementById("sc-panel");
+  const closeBtn = document.getElementById("sc-close-btn");
+  const searchInput = document.getElementById("sc-search-input");
+  const searchBtn = document.getElementById("sc-search-btn");
+  const scFrame = document.getElementById("sc-widget-frame");
+  const scVol = document.getElementById("sc-volume");
+  const scVolVal = document.getElementById("scVolVal");
+
+  if (toggleBtn && panel) {
+    toggleBtn.addEventListener("click", () => {
+      panel.classList.toggle("open");
+      toggleBtn.classList.toggle("on");
+    });
+  }
+  if (closeBtn && panel) {
+    closeBtn.addEventListener("click", () => {
+      panel.classList.remove("open");
+      toggleBtn.classList.remove("on");
+    });
+  }
+
+  // SoundCloud Widget Controller
+  let scWidget = null;
+  if (window.SC && scFrame) {
+    scWidget = SC.Widget(scFrame);
+  }
+
+  function doSearch() {
+    if (!scFrame) return;
+    let q = (searchInput ? searchInput.value.trim() : "").toLowerCase();
+    if (!q) q = "peterlodri";
+    let targetUrl = "https://soundcloud.com/peterlodri";
+    if (q !== "peterlodri" && q !== "@peterlodri") {
+      targetUrl = "https://soundcloud.com/search?q=" + encodeURIComponent(q);
+    }
+    scFrame.src = "https://w.soundcloud.com/player/?url=" + encodeURIComponent(targetUrl) + "&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true";
+  }
+
+  if (searchBtn) searchBtn.addEventListener("click", doSearch);
+  if (searchInput) {
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") doSearch();
+    });
+  }
+
+  if (scVol) {
+    scVol.addEventListener("input", () => {
+      const v = Number(scVol.value);
+      if (scVolVal) scVolVal.textContent = String(v);
+      if (scWidget && typeof scWidget.setVolume === "function") {
+        scWidget.setVolume(v);
+      }
     });
   }
 })();
