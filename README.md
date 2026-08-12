@@ -11,9 +11,12 @@ Live URL: **[https://music.vaked.dev](https://music.vaked.dev)**
 `music.vaked.dev` is the living ambient sound node of the **vaked.dev constellation**. It serves as an iframe audio-reactive background layer across `art.vaked.dev` and other ecosystem surfaces.
 
 ### Key Features
-- **Three.js Particle Sphere**: Self-generating Fibonacci particle shell that expands and contracts in resonance with the sound.
-- **Web Audio Engine**: Procedural ambient synthesis generated directly in the browser via Web Audio API—no static MP3s, zero network payload.
-- **Cross-Site Integration**: Embedded via `<iframe id="musicbg" src="https://music.vaked.dev/" ... style="mix-blend-mode:screen; opacity:0.3"></iframe>` to provide ambient atmosphere.
+- **3D WebGL Wireframe Icosahedron & Particle Sphere**: Self-generating Fibonacci particle shell and audio-reactive 3D wireframe Icosahedron mesh that expands and pulses in 60FPS WebGL.
+- **Dual-Engine Audio Blend**: Live procedural Web Audio API synthesis (432Hz Drone & EP Vol. 1 Progressions) blended seamlessly with an interactive SoundCloud player.
+- **Searchable SoundCloud Mini Player & Drawer**: Embedded SoundCloud Widget API with live search (@peterlodri & featured artist presets), track comments, and independent `SC VOL` volume controls.
+- **Featured Artist Partner**: **[8bit-wraith](https://soundcloud.com/8bit-wraith)** (brother & inspiration) integrated with quick-preset player buttons.
+- **24-Bit Lossless Master & Vinyl On-Demand**: Audio masters encoded in uncompressed 24-bit 96kHz/48kHz WAV format ready for 0 Ft upfront SoundCloud Vinyl On-Demand distribution.
+- **Cross-Site Integration**: Embedded via `<iframe id="musicbg" src="https://music.vaked.dev/" ... style="mix-blend-mode:screen; opacity:0.3"></iframe>` across the constellation.
 
 ---
 
@@ -25,5 +28,6 @@ Live URL: **[https://music.vaked.dev](https://music.vaked.dev)**
 - ✦ **[quant-love](https://mlxquantlovefrom.com)**
 - ✦ **[proposal.vaked.dev](https://proposal.vaked.dev)**
 - ✦ **[pocoo.vaked.dev](https://pocoo.vaked.dev)**
+- 👾 **[8bit-wraith on SoundCloud](https://soundcloud.com/8bit-wraith)** *(brother & inspiration)*
 
 *the constellation · 0 + 1 · fine touch from within · vaked.dev*
