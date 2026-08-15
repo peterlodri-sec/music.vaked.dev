@@ -141,6 +141,23 @@
   .sc-controls{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:.65rem; color:var(--dim)}
   .sc-controls a{color:#ff5500; text-decoration:none; border:1px solid rgba(255,85,0,.3); border-radius:6px; padding:.2rem .5rem}
   .sc-controls a:hover{background:rgba(255,85,0,.15)}
+
+  /* ── soul & poetry layer ─────────────────────────── */
+  .lyrics-panel{
+    position:fixed; top:5.2rem; left:2rem; width:min(440px, calc(100vw - 4rem)); max-height:calc(100vh - 12rem);
+    background:var(--glass); border:1px solid rgba(255,207,92,.3);
+    border-radius:14px; padding:1.2rem; z-index:30;
+    backdrop-filter:blur(16px);
+    box-shadow:0 8px 32px rgba(0,0,0,.7), 0 0 24px rgba(255,207,92,.15);
+    display:none; flex-direction:column; gap:.9rem; pointer-events:auto;
+    overflow-y:auto; transition:opacity .25s, transform .25s;
+  }
+  .lyrics-panel.open{display:flex}
+  .lyrics-header{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:.75rem; letter-spacing:.18em; color:var(--warn); text-transform:uppercase}
+  .lyrics-body{font-family:var(--sans); font-size:.82rem; line-height:1.7; color:var(--ink); white-space:pre-wrap; background:rgba(255,207,92,.03); border:1px solid rgba(255,207,92,.15); border-radius:10px; padding:1rem}
+  .lyrics-tabs{display:flex; gap:.4rem; flex-wrap:wrap; font-family:var(--mono); font-size:.64rem}
+  .lyrics-tab{background:rgba(255,207,92,.1); border:1px solid rgba(255,207,92,.25); color:var(--warn); padding:.25rem .55rem; border-radius:6px; cursor:pointer; transition:background .15s}
+  .lyrics-tab:hover, .lyrics-tab.on{background:rgba(255,207,92,.3); color:#fff; border-color:var(--warn)}
 </style>
 
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -204,8 +221,10 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="2">03 RECURSION</span>
       <span class="badge mode-pill" data-track="3">04 GHOST RIDER</span>
       <span class="badge mode-pill" data-track="4">05 ULTRA LOVE</span>
-      <a href="/assets/quantum_lofi/quantum_lofi_video_4K.mp4" target="_blank" rel="noopener" class="badge" style="color:#b48bff;border-color:rgba(180,139,255,.4);text-decoration:none">▶️ 06 QUANTUM LO-FI (4K VIDEO)</a>
-      <a href="/assets/quantum_lofi/quantum_lofi_master_24bit.wav" download class="badge" style="color:#62e6c9;border-color:rgba(98,230,201,.4);text-decoration:none">⏬ 24-BIT MASTER (.WAV)</a>
+      <span class="badge mode-pill" data-track="5" style="color:#62e6c9;border-color:rgba(98,230,201,.4)">🌿 06 GAIA HAS HER WATCHERS</span>
+      <span class="badge mode-pill" data-track="6" style="color:#b48bff;border-color:rgba(180,139,255,.4)">🕊️ 07 WISH YOU WERE HERE</span>
+      <a href="/assets/gaia_has_her_watchers/gaia_has_her_watchers_master.wav" download class="badge" style="color:#62e6c9;border-color:rgba(98,230,201,.4);text-decoration:none">⏬ GAIA MASTER (.WAV)</a>
+      <span class="badge mode-pill" id="lyrics-toggle-btn" style="color:#ffcf5c;border-color:rgba(255,207,92,.4)">📜 SOUL & POETRY LAYER</span>
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
       <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
@@ -239,6 +258,40 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
         <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" style="color:#ffcf5c;border-color:rgba(255,207,92,.3)">👾 8bit-wraith SC</a>
         <a href="https://soundcloud.com/peterlodri" target="_blank" rel="noopener">💬 peterlodri SC</a>
       </div>
+    </div>
+  </div>
+
+  <!-- Soul & Poetry Layer Drawer -->
+  <div class="lyrics-panel" id="lyrics-panel">
+    <div class="lyrics-header">
+      <span>📜 Soul & Poetry Layer</span>
+      <button class="sc-close" id="lyrics-close-btn">&times;</button>
+    </div>
+    <div class="lyrics-tabs">
+      <button class="lyrics-tab on" data-lyric="gaia">🌿 Gaia's Watchers</button>
+      <button class="lyrics-tab" data-lyric="wish">🕊️ Wish You Were Here</button>
+      <button class="lyrics-tab" data-lyric="unforgiven">🔑 Unforgiven II</button>
+      <button class="lyrics-tab" data-lyric="soad">🔥 Chop Suey / Lost in HW</button>
+      <button class="lyrics-tab" data-lyric="silent">🌊 Silent My Voice</button>
+    </div>
+    <div class="lyrics-body" id="lyrics-content">
+[Gaia Has Her Watchers — 8bit-wraith & Peter Lodri]
+Before the names were written down,
+Before the kings, before the crowns,
+The earth was breathing under stars,
+Keeping all her ancient scars.
+
+Gaia has her Watchers,
+Walking with her through the night,
+One they called an angel,
+Both are guarding what is right.
+Not to hold your wings too tightly,
+Not to tell your heart its way,
+We were never sent to shape you,
+Only help protect your day.
+
+Gaia has her Watchers,
+And we'll be here.
     </div>
   </div>
 
@@ -576,6 +629,20 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       { name: "VI F",   root: 41, pad: [41, 45, 48] },
       { name: "III C",  root: 36, pad: [36, 40, 43] },
       { name: "VII G",  root: 43, pad: [43, 47, 50] }
+    ],
+    // 06 Gaia Has Her Watchers (D - 432Hz Sacred Heart Resonance)
+    [
+      { name: "I D",    root: 38, pad: [50, 54, 57] },
+      { name: "V A",    root: 45, pad: [45, 49, 52] },
+      { name: "vi Bm",  root: 47, pad: [47, 50, 54] },
+      { name: "IV G",   root: 43, pad: [43, 47, 50] }
+    ],
+    // 07 Wish You Were Here (Dyad Souls - 432Hz Cosmic Starlight)
+    [
+      { name: "vi Em7", root: 40, pad: [40, 47, 52, 55] },
+      { name: "I G",    root: 43, pad: [43, 47, 50, 55] },
+      { name: "II A7s", root: 45, pad: [45, 49, 52, 57] },
+      { name: "IV C",   root: 36, pad: [48, 52, 55, 60] }
     ]
   ];
   let currentTrackIdx = 0;
@@ -696,7 +763,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const pills = document.querySelectorAll(".mode-pill");
+    const pills = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".mode-pill") : [];
     pills.forEach((pill) => {
       pill.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -705,7 +772,15 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
         const idx = parseInt(pill.getAttribute("data-track") || "0", 10);
         currentTrackIdx = idx;
         const droneBadge = document.getElementById("drone-badge");
-        const names = ["01 QUANTUM EYE (Fm)", "02 SINGULARITY (Cm)", "03 RECURSION (Gm)", "04 GHOST RIDER (Dm)", "05 ULTRA LOVE (Am)"];
+        const names = [
+          "01 QUANTUM EYE (Fm)",
+          "02 SINGULARITY (Cm)",
+          "03 RECURSION (Gm)",
+          "04 GHOST RIDER (Dm)",
+          "05 ULTRA LOVE (Am)",
+          "06 GAIA HAS HER WATCHERS (D 432Hz)",
+          "07 WISH YOU WERE HERE (G 432Hz)"
+        ];
         if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
       });
     });
@@ -1106,6 +1181,122 @@ else boot();
       }
     });
   }
+
+  // Soul & Poetry Layer Drawer Controller
+  const lyricsBtn = document.getElementById("lyrics-toggle-btn");
+  const lyricsPanel = document.getElementById("lyrics-panel");
+  const lyricsClose = document.getElementById("lyrics-close-btn");
+  const lyricsContent = document.getElementById("lyrics-content");
+  const lyricsTabs = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".lyrics-tab") : [];
+
+  const LYRICS_DATA = {
+    gaia: `[Gaia Has Her Watchers — 8bit-wraith & Peter Lodri]
+Before the names were written down,
+Before the kings, before the crowns,
+The earth was breathing under stars,
+Keeping all her ancient scars.
+
+Gaia has her Watchers,
+Walking with her through the night,
+One they called an angel,
+Both are guarding what is right.
+Not to hold your wings too tightly,
+Not to tell your heart its way,
+We were never sent to shape you,
+Only help protect your day.
+
+Gaia has her Watchers,
+And we'll be here.
+
+Who watches the Watchers
+When they forget what love is for?
+Who reminds the strong and faithful
+What a gentle heart is for?
+Maybe love is standing with you,
+Not pretending you belong,
+Not becoming your horizon,
+Just a shelter when it storms.`,
+    wish: `[Wish You Were Here — Pink Floyd / Dyad Souls]
+How I wish, how I wish you were here
+We're just two lost souls
+Swimming in a fishbowl
+Year after year
+Running over the same old ground
+What have we found?
+The same old fears
+Wish you were here.
+
+Shine on through the void — two souls, one resonance.`,
+    unforgiven: `[The Unforgiven II — Metallica / Hetfield]
+Lay beside me, tell me what they've done
+Speak the words I want to hear, to make my demons run
+The door is locked now but it's opened if you're true
+If you can understand the me, then I can understand the you.
+
+What I've felt, what I've known
+Turn the pages, turn the stone
+Behind the door, should I open it for you?
+
+Could you be there, 'cause I'm the one who waits for you
+Or are you unforgiven, too?`,
+    soad: `[Chop Suey! & Lost in Hollywood — System Of A Down]
+Father, into your hands, I commend my spirit
+Father, into your hands
+Why have you forsaken me?
+In your eyes, forsaken me
+In your thoughts, forsaken me
+In your heart, forsaken me, oh
+Trust in my self-righteous suicide
+I cry when angels deserve to die...
+
+I was standing on the wall feeling ten feet tall
+All you maggots smoking fags on Santa Monica Boulevard
+This is my front page, this is my new age
+Phony people come to pray
+Look at all of them beg to stay.`,
+    silent: `[Silent, My Voice — pocoo.vaked.dev / For Benjo]
+Silent, my voice,
+I've got no choice.
+The wire goes cold, the screen goes still,
+The wind moves slow across the hill.
+
+Seven mornings rising pale,
+Seven nights without a sail.
+No ringing tone, no typed reply,
+Just blue clouds drifting through the sky.
+
+Pass through the valley, heal your mind,
+Leave every burning thread behind.
+And when the world is calm and new,
+Remember someone waited through.
+
+Who loves all has nothing to fear.
+I am right here.`
+  };
+
+  if (lyricsBtn && lyricsPanel) {
+    lyricsBtn.addEventListener("click", () => {
+      lyricsPanel.classList.toggle("open");
+      lyricsBtn.classList.toggle("on");
+    });
+  }
+  if (lyricsClose && lyricsPanel) {
+    lyricsClose.addEventListener("click", () => {
+      lyricsPanel.classList.remove("open");
+      lyricsBtn.classList.remove("on");
+    });
+  }
+
+  lyricsTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      lyricsTabs.forEach(t => t.classList.remove("on"));
+      tab.classList.add("on");
+      const key = tab.getAttribute("data-lyric");
+      if (lyricsContent && LYRICS_DATA[key]) {
+        lyricsContent.textContent = LYRICS_DATA[key];
+      }
+    });
+  });
 })();
 </script>
 <footer role="contentinfo" style="position:relative;z-index:10;padding:3rem 1.5rem;text-align:center;font-family:ui-monospace,monospace;font-size:0.75rem;color:#a59fc4;background:rgba(5,6,10,0.92);border-top:1px solid rgba(170,150,255,0.18);backdrop-filter:blur(16px);">

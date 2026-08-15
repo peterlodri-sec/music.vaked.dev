@@ -54,6 +54,8 @@ const sandbox = {
   document: {
     readyState: "complete",
     getElementById: () => makeStub({}),
+    querySelector: () => makeStub({}),
+    querySelectorAll: () => [],
     addEventListener() {},
     createElement: () => makeStub({}),
     body: makeStub({}),
