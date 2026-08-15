@@ -23,7 +23,7 @@ import vm from "node:vm";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const html = readFileSync(resolve(HERE, "index.html"), "utf8");
 
-const scripts = [...html.matchAll(/<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/g)]
+const scripts = [...html.matchAll(/<script(?![^>]*src=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/gi)]
   .map(m => m[1])
   .filter(s => s.trim().length > 0);
 
@@ -34,8 +34,9 @@ if (scripts.length === 0) {
 
 function makeStub(el) {
   return {
-    classList: { add() {}, remove() {}, contains: () => false },
+    classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     style: {}, textContent: "", appendChild() {}, getContext: () => null,
+    addEventListener() {}, removeEventListener() {},
   };
 }
 
