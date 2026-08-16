@@ -2,5 +2,9 @@
   Cache-Control: public, max-age=0, must-revalidate
   X-Robots-Tag: noai, noimageai
   X-Content-Type-Options: nosniff
-  X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
+  # Constellation-standard CSP. script-src carries 'unsafe-inline' because the
+  # vaked.dev zone injects Cloudflare's JS-detection challenge as an inline
+  # bootstrap into every HTML response — blocking it breaks the challenge.
+  # frame-ancestors keeps the ambient layer embeddable by its sister sites.
+  Content-Security-Policy: default-src 'self' 'unsafe-inline' https: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; font-src 'self' data: https:; connect-src 'self' https: wss:; frame-src 'self' https:; frame-ancestors 'self' https://*.vaked.dev https://*.pages.dev
