@@ -35,7 +35,8 @@ CF_PROJECT = "music-vaked-dev"
 CF_DOMAIN = "https://music.vaked.dev"
 EXPECTED_TITLE = "music.vaked.dev · intergalactic cogito ergo sum TV"
 ASSEMBLE_FILES = [
-    "index.html", "404.html", "favicon.svg", "robots.txt", "site.webmanifest",
+    "_headers", "index.html", "404.html", "favicon.svg", "robots.txt", "site.webmanifest",
+    "feed.xml", "sovereign-sdk.js",
     "llms.txt", "LICENSE",
     "icon-192.png", "icon-512.png", "apple-touch-icon.png", "og-image.png", "og-image.svg",
 ]
@@ -186,6 +187,9 @@ def assemble_site() -> Path:
     for f in ASSEMBLE_FILES:
         if (HERE / f).exists():
             shutil.copy2(HERE / f, site / f)
+    assets = HERE / "assets"
+    if assets.exists():
+        shutil.copytree(assets, site / "assets")
     return site
 
 
