@@ -500,6 +500,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="5" style="color:#62e6c9;border-color:rgba(98,230,201,.4)">🌿 06 GAIA HAS HER WATCHERS</span>
       <span class="badge mode-pill" data-track="6" style="color:#b48bff;border-color:rgba(180,139,255,.4)">🕊️ 07 WISH YOU WERE HERE</span>
       <span class="badge mode-pill" data-track="7" style="color:#ff2a85;border-color:rgba(255,42,133,.5);text-shadow:0 0 12px rgba(255,42,133,.6);font-weight:700">⚡ 08 THE FEELING (MASSANO × ULTRALOVE)</span>
+      <span class="badge mode-pill" data-track="8" style="color:#ffd700;border-color:rgba(255,215,0,.5);text-shadow:0 0 12px rgba(255,215,0,.6);font-weight:700">☀️ 09 LOVE IS GONNA SAVE US (ARTBAT × BENASSI)</span>
       <span class="badge mode-pill" id="lyrics-toggle-btn" style="color:#ffcf5c;border-color:rgba(255,207,92,.4)">📜 SOUL & POETRY LAYER</span>
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
@@ -525,6 +526,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button id="sc-preset-peter" style="background:rgba(98,230,201,.15);border:1px solid rgba(98,230,201,.3);color:#62e6c9;padding:.2rem .5rem;border-radius:4px;cursor:pointer">@peterlodri</button>
       <button id="sc-preset-wraith" style="background:rgba(255,207,92,.15);border:1px solid rgba(255,207,92,.4);color:#ffcf5c;padding:.2rem .5rem;border-radius:4px;cursor:pointer">👾 8bit-wraith (Brother)</button>
       <button id="sc-preset-massano" style="background:rgba(255,42,133,.2);border:1px solid rgba(255,42,133,.5);color:#ff2a85;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">⚡ Massano - The Feeling</button>
+      <button id="sc-preset-artbat" style="background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5);color:#ffd700;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">☀️ ARTBAT & Benassi - Love Is Gonna Save Us</button>
     </div>
     <iframe id="sc-widget-frame" src="about:blank" width="100%" height="166" frameborder="0" allow="autoplay"></iframe>
     <div class="sc-controls">
@@ -537,6 +539,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
         <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" style="color:#ffcf5c;border-color:rgba(255,207,92,.3)">👾 8bit-wraith SC</a>
         <a href="https://soundcloud.com/peterlodri" target="_blank" rel="noopener">💬 peterlodri SC</a>
         <a href="https://soundcloud.com/massanomusic/massano-the-feeling-2022-remaster1" target="_blank" rel="noopener" style="color:#ff2a85;border-color:rgba(255,42,133,.4)">⚡ Massano SC</a>
+        <a href="https://soundcloud.com/artbatmusic" target="_blank" rel="noopener" style="color:#ffd700;border-color:rgba(255,215,0,.4)">☀️ ARTBAT SC</a>
       </div>
     </div>
   </div>
@@ -548,7 +551,8 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button class="sc-close" id="lyrics-close-btn">&times;</button>
     </div>
     <div class="lyrics-tabs">
-      <button class="lyrics-tab on" data-lyric="feeling">⚡ The Feeling (Massano × Ultralove)</button>
+      <button class="lyrics-tab on" data-lyric="artbat">☀️ Love Is Gonna Save Us (Mr Sunshine)</button>
+      <button class="lyrics-tab" data-lyric="feeling">⚡ The Feeling (Massano × Ultralove)</button>
       <button class="lyrics-tab" data-lyric="gaia">🌿 Gaia's Watchers</button>
       <button class="lyrics-tab" data-lyric="wish">🕊️ Wish You Were Here</button>
       <button class="lyrics-tab" data-lyric="unforgiven">🔑 Unforgiven II</button>
@@ -944,6 +948,13 @@ And we'll be here.
       { name: "VI C (The Feeling)", root: 36, pad: [36, 43, 48, 52], lead: [60, 64, 67, 72] },
       { name: "III G (Universal)",  root: 43, pad: [43, 47, 50, 55], lead: [67, 71, 74, 79] },
       { name: "VII D (Ultralove)",  root: 38, pad: [38, 45, 50, 54], lead: [62, 65, 69, 74] }
+    ],
+    // 09 Love Is Gonna Save Us (ARTBAT x Benny Benassi x Mr Sunshine)
+    [
+      { name: "i Am (Save Us)",      root: 45, pad: [45, 48, 52, 57], lead: [57, 60, 64, 69] },
+      { name: "VI F (Mr Sunshine)",  root: 41, pad: [41, 45, 48, 53], lead: [53, 57, 60, 65] },
+      { name: "III C (Ultramarathon)",root: 36, pad: [36, 40, 43, 48], lead: [60, 64, 67, 72] },
+      { name: "VII G (Backyard)",    root: 43, pad: [43, 47, 50, 55], lead: [55, 59, 62, 67] }
     ]
   ];
   let currentTrackIdx = 0;
@@ -1035,47 +1046,61 @@ And we'll be here.
     voice("triangle", MELODY_BASE + deg + oct, t, dur, 0.09, 0.03, 0.18);
   };
 
-  /* ── the bonobo layer — warm, downtempo, soulful under-texture ──
-     Bonobo (Simon Green) sound: long-attack mellow pads, a soft
-     sub-bass that breathes, and a wide detuned shimmer. Rides under
-     the existing INTO LOVE signal, never over it. */
-  const bonobo = function (chord, t, root) {
-    // 1. wide detuned pad — two triangles, slightly off-pitch, long attack
-    for (let i = 0; i < chord.length; i++) {
-      voice("triangle", chord[i], t, 8 * BEAT, 0.028, 2.5, 2.8);
-      voice("triangle", chord[i] + 0.07, t, 8 * BEAT, 0.022, 2.5, 2.8);
-    }
-    // 2. soft sub-bass — sine an octave down, slow swell
-    voice("sine", root - 24, t, 8 * BEAT, 0.085, 1.8, 2.5);
+  /* ── the bonobo under-layer — an ambient acoustic drone ── */
+  const bonobo = function (padNotes, t, root) {
+    if (rng() > 0.45) return;
+    const n1 = padNotes[0] || root;
+    const n2 = padNotes[1] || root + 7;
+    voice("sine", n1, t, 12 * BEAT, 0.055, 2.0, 3.5);
+    voice("triangle", n2, t, 10 * BEAT, 0.035, 2.2, 3.0);
     voice("sine", root - 12, t, 8 * BEAT, 0.040, 1.8, 2.5);
-    // 3. a faint sparkle — the bonobo shimmer, occasional
     if (rng() > 0.82) voice("sine", root + 19, t, 4 * BEAT, 0.014, 0.6, 1.5);
   };
 
-  /* ── the massano drop layer — melodic techno, reszetelős sub-bass & giga drop ──
-     Massano (The Feeling) sound: rolling 16th sub-drive, detuned saw plucks,
-     tension risers, and heavy emotional melodic counterwave. */
+  /* ── the massano drop layer — melodic techno, reszetelős sub-bass & giga drop ── */
   const massanoDropLayer = function (prog, t, s16, bar) {
     const root = prog.root;
-    // 1. Reszetelős Rolling 16th Sub-Bass (Punchy saw/sine drive on every 16th note)
     const isKick = (s16 % 4 === 0);
     const isOffbeat = (s16 % 2 === 1);
     if (isKick) {
-      voice("sine", root - 24, t, SIXTEENTH * 1.5, 0.42, 0.005, 0.08); // Sub thump
+      voice("sine", root - 24, t, SIXTEENTH * 1.5, 0.42, 0.005, 0.08);
       voice("triangle", root - 12, t, SIXTEENTH * 1.2, 0.22, 0.008, 0.06);
     } else if (isOffbeat) {
-      voice("sawtooth", root - 12, t, SIXTEENTH * 0.95, 0.28, 0.01, 0.05); // Rolling drive
+      voice("sawtooth", root - 12, t, SIXTEENTH * 0.95, 0.28, 0.01, 0.05);
     }
-    // 2. Detuned Supersaw Melodic Plucks (Massano 'The Feeling' motif)
     if (prog.lead && s16 % 2 === 0) {
       const leadNote = prog.lead[(s16 / 2) % prog.lead.length];
       voice("sawtooth", leadNote, t, SIXTEENTH * 1.8, 0.09, 0.01, 0.12);
       voice("sawtooth", leadNote + 0.08, t, SIXTEENTH * 1.8, 0.07, 0.01, 0.12);
       voice("triangle", leadNote + 12, t, SIXTEENTH * 1.5, 0.04, 0.01, 0.10);
     }
-    // 3. Tension Riser / Drop swell on 4th bar
     if (bar % 4 === 3 && s16 >= 12) {
       voice("sine", root + 24 + (s16 - 12) * 3, t, SIXTEENTH * 1.2, 0.08, 0.01, 0.05);
+    }
+  };
+
+  /* ── ARTBAT x Benny Benassi: Love Is Gonna Save Us (Pumping Electro-Melodic 432Hz Drive) ── */
+  const artbatBenassiLayer = function (prog, t, s16, bar) {
+    const root = prog.root;
+    const isKick = (s16 % 4 === 0);
+    const isPump = (s16 % 2 === 1);
+    // 1. Benassi Signature Pumping Bass (Square + Sawtooth sidechain pump)
+    if (isKick) {
+      voice("sine", root - 24, t, SIXTEENTH * 1.8, 0.48, 0.004, 0.09);
+    } else if (isPump) {
+      voice("square", root - 12, t, SIXTEENTH * 1.4, 0.32, 0.012, 0.08);
+      voice("sawtooth", root, t, SIXTEENTH * 1.1, 0.20, 0.015, 0.07);
+    }
+    // 2. ARTBAT Atmospheric Anthemic Lead Arpeggiation
+    if (prog.lead) {
+      const stepIdx = s16 % prog.lead.length;
+      const leadNote = prog.lead[stepIdx] + ((bar % 2 === 1) ? 12 : 0);
+      voice("sawtooth", leadNote, t, SIXTEENTH * 2.2, 0.11, 0.01, 0.14);
+      voice("sine", leadNote + 0.05, t, SIXTEENTH * 2.0, 0.08, 0.01, 0.12);
+    }
+    // 3. Mr Sunshine High Harmonic Giga Lift
+    if (bar % 8 >= 6 && s16 % 4 === 2) {
+      voice("triangle", root + 24, t, SIXTEENTH * 2.5, 0.07, 0.02, 0.15);
     }
   };
 
@@ -1084,9 +1109,14 @@ And we'll be here.
     const s16 = s % 16;
     const activeProg = EP_PROGRESSIONS[currentTrackIdx] || EP_PROGRESSIONS[0];
     const prog = activeProg[bar % activeProg.length];
-    const plan = barPlan();                       // deterministic per seed
+    const plan = barPlan();
 
-    if (activeSeedMode === "dual") {
+    if (currentTrackIdx === 8) {
+      // ☀️ Track 09: Love Is Gonna Save Us (ARTBAT x Benny Benassi x Mr Sunshine)
+      if (s16 === 0) pad(prog.pad, t);
+      artbatBenassiLayer(prog, t, s16, bar);
+      if (plan.melAt[s16]) melody(t, SIXTEENTH * 2);
+    } else if (activeSeedMode === "dual") {
       // ☯️ Double Seed: n===0 (Genesis Ambient) + n===1 (Massano Counterwave Drop)
       if (s16 === 0) pad(prog.pad, t);
       if (s16 === 0) bonobo(prog.pad, t, prog.root);
@@ -1169,10 +1199,38 @@ And we'll be here.
           "05 ULTRA LOVE (Am)",
           "06 GAIA HAS HER WATCHERS (D 432Hz)",
           "07 WISH YOU WERE HERE (G 432Hz)",
-          "08 THE FEELING (MASSANO × ULTRALOVE)"
+          "08 THE FEELING (MASSANO × ULTRALOVE)",
+          "09 LOVE IS GONNA SAVE US (ARTBAT × BENASSI)"
         ];
         if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
       });
+    });
+
+    // 🎹 Keyboard Shortcuts for Ultra Pro Navigation
+    window.addEventListener("keydown", (e) => {
+      // Avoid capturing shortcuts when user is typing in search input
+      if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+      if (e.code === "Space") {
+        e.preventDefault();
+        window.intoLove.toggle();
+      } else if (e.key >= "1" && e.key <= "9") {
+        const targetIdx = parseInt(e.key, 10) - 1;
+        if (pills[targetIdx]) pills[targetIdx].click();
+      } else if (e.key === "s" || e.key === "S") {
+        const seedBadge = document.getElementById("seed-badge");
+        if (seedBadge) seedBadge.click();
+      } else if (e.key === "l" || e.key === "L") {
+        const lyricsBtn = document.getElementById("lyrics-toggle-btn");
+        if (lyricsBtn) lyricsBtn.click();
+      } else if (e.key === "c" || e.key === "C") {
+        const scBtn = document.getElementById("sc-toggle-btn");
+        if (scBtn) scBtn.click();
+      } else if (e.key === "Escape") {
+        const lp = document.getElementById("lyrics-panel");
+        const sp = document.getElementById("sc-panel");
+        if (lp) lp.classList.remove("open");
+        if (sp) sp.classList.remove("open");
+      }
     });
   });
 
@@ -1533,6 +1591,7 @@ else boot();
   const pPeter = document.getElementById("sc-preset-peter");
   const pWraith = document.getElementById("sc-preset-wraith");
   const pMassano = document.getElementById("sc-preset-massano");
+  const pArtbat = document.getElementById("sc-preset-artbat");
 
   if (pPeter) {
     pPeter.addEventListener("click", () => {
@@ -1552,6 +1611,12 @@ else boot();
       loadUrl("https://soundcloud.com/massanomusic/massano-the-feeling-2022-remaster1");
     });
   }
+  if (pArtbat) {
+    pArtbat.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "artbat benny benassi love is gonna save us";
+      loadUrl("https://soundcloud.com/artbatmusic/artbat-love-is-gonna-save-us");
+    });
+  }
 
   function doSearch() {
     if (!scFrame) return;
@@ -1562,6 +1627,8 @@ else boot();
       loadUrl("https://soundcloud.com/8bit-wraith");
     } else if (q.includes("massano")) {
       loadUrl("https://soundcloud.com/massanomusic/massano-the-feeling-2022-remaster1");
+    } else if (q.includes("artbat") || q.includes("benassi") || q.includes("save us")) {
+      loadUrl("https://soundcloud.com/artbatmusic/artbat-love-is-gonna-save-us");
     } else {
       loadUrl("https://soundcloud.com/search?q=" + encodeURIComponent(q));
     }
@@ -1592,6 +1659,24 @@ else boot();
   const lyricsTabs = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".lyrics-tab") : [];
 
   const LYRICS_DATA = {
+    artbat: `[Love Is Gonna Save Us — ARTBAT × Benny Benassi × Mr Sunshine]
+[Backyard Ultra of Ultras — 432Hz Pumping Melodic Anthem]
+
+Mr Sunshine woke up today,
+Golden rays piercing through the cold horizon.
+42 laps in the backyard hall — refusing to stop.
+Every step is a beat, every beat is a breath.
+
+Love is gonna save us.
+When the algorithm falls,
+When the noise fades into pure silence,
+Love is the constant that remains.
+
+Pumping 16th-note square bassline driving through the metal,
+ARTBAT atmospheric soaring leads across continents,
+From Budapest to Madrid to the void.
+Standing tall. Last one standing.
+Love is gonna save us.`,
     feeling: `[The Feeling (2022 Remaster) — Massano × Ultralovegod]
 [Universal Melodic Reszetelős Heavy Giga Drops Counterwave]
 
