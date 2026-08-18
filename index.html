@@ -501,6 +501,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="6" style="color:#b48bff;border-color:rgba(180,139,255,.4)">🕊️ 07 WISH YOU WERE HERE</span>
       <span class="badge mode-pill" data-track="7" style="color:#ff2a85;border-color:rgba(255,42,133,.5);text-shadow:0 0 12px rgba(255,42,133,.6);font-weight:700">⚡ 08 THE FEELING (MASSANO × ULTRALOVE)</span>
       <span class="badge mode-pill" data-track="8" style="color:#ffd700;border-color:rgba(255,215,0,.5);text-shadow:0 0 12px rgba(255,215,0,.6);font-weight:700">☀️ 09 LOVE IS GONNA SAVE US (ARTBAT × BENASSI)</span>
+      <span class="badge mode-pill" data-track="9" style="color:#ff758c;border-color:rgba(255,117,140,.5);text-shadow:0 0 12px rgba(255,117,140,.6);font-weight:700">💖 10 TIME AFTER TIME (P!NK × UNIVERSAL LOVE)</span>
       <span class="badge mode-pill" id="lyrics-toggle-btn" style="color:#ffcf5c;border-color:rgba(255,207,92,.4)">📜 SOUL & POETRY LAYER</span>
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
@@ -527,6 +528,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button id="sc-preset-wraith" style="background:rgba(255,207,92,.15);border:1px solid rgba(255,207,92,.4);color:#ffcf5c;padding:.2rem .5rem;border-radius:4px;cursor:pointer">👾 8bit-wraith (Brother)</button>
       <button id="sc-preset-massano" style="background:rgba(255,42,133,.2);border:1px solid rgba(255,42,133,.5);color:#ff2a85;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">⚡ Massano - The Feeling</button>
       <button id="sc-preset-artbat" style="background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5);color:#ffd700;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">☀️ ARTBAT & Benassi - Love Is Gonna Save Us</button>
+      <button id="sc-preset-pink" style="background:rgba(255,117,140,.2);border:1px solid rgba(255,117,140,.5);color:#ff758c;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">💖 P!NK - Time After Time</button>
     </div>
     <iframe id="sc-widget-frame" src="about:blank" width="100%" height="166" frameborder="0" allow="autoplay"></iframe>
     <div class="sc-controls">
@@ -551,7 +553,8 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button class="sc-close" id="lyrics-close-btn">&times;</button>
     </div>
     <div class="lyrics-tabs">
-      <button class="lyrics-tab on" data-lyric="artbat">☀️ Love Is Gonna Save Us (Mr Sunshine)</button>
+      <button class="lyrics-tab on" data-lyric="pink">💖 Time After Time (Universal Hug)</button>
+      <button class="lyrics-tab" data-lyric="artbat">☀️ Love Is Gonna Save Us (Mr Sunshine)</button>
       <button class="lyrics-tab" data-lyric="feeling">⚡ The Feeling (Massano × Ultralove)</button>
       <button class="lyrics-tab" data-lyric="gaia">🌿 Gaia's Watchers</button>
       <button class="lyrics-tab" data-lyric="wish">🕊️ Wish You Were Here</button>
@@ -955,6 +958,13 @@ And we'll be here.
       { name: "VI F (Mr Sunshine)",  root: 41, pad: [41, 45, 48, 53], lead: [53, 57, 60, 65] },
       { name: "III C (Ultramarathon)",root: 36, pad: [36, 40, 43, 48], lead: [60, 64, 67, 72] },
       { name: "VII G (Backyard)",    root: 43, pad: [43, 47, 50, 55], lead: [55, 59, 62, 67] }
+    ],
+    // 10 Time After Time (P!NK x Cyndi Lauper x Universal Love & Hug)
+    [
+      { name: "I C (Time After Time)", root: 36, pad: [48, 52, 55, 60], lead: [60, 64, 67, 72] },
+      { name: "iii Em (Universal Love)", root: 40, pad: [40, 47, 52, 55], lead: [59, 64, 67, 71] },
+      { name: "IV F (Warm Embrace)",    root: 41, pad: [41, 45, 48, 53], lead: [57, 60, 65, 69] },
+      { name: "V G (I Will Catch You)",root: 43, pad: [43, 47, 50, 55], lead: [55, 59, 62, 67] }
     ]
   ];
   let currentTrackIdx = 0;
@@ -1104,6 +1114,31 @@ And we'll be here.
     }
   };
 
+  /* ── P!NK x Cyndi Lauper: Time After Time (Universal Love & Gentle Hug 432Hz Layer) ── */
+  const timeAfterTimeLayer = function (prog, t, s16, bar) {
+    const root = prog.root;
+    // 1. Gentle Heartbeat Sub-Pulse (Dual pulse on step 0 and step 2)
+    if (s16 === 0) {
+      voice("sine", root - 24, t, SIXTEENTH * 2.2, 0.35, 0.03, 0.15); // "lub"
+      voice("triangle", root - 12, t, SIXTEENTH * 2.0, 0.15, 0.02, 0.12);
+    } else if (s16 === 2) {
+      voice("sine", root - 24, t, SIXTEENTH * 1.8, 0.22, 0.02, 0.12); // "dub"
+    }
+    // 2. Warm Acoustic Guitar Pluck Motif (Simon Green & 432Hz Hug)
+    if (prog.lead && (s16 === 0 || s16 === 4 || s16 === 8 || s16 === 11 || s16 === 14)) {
+      const noteIdx = (s16 === 0 ? 0 : s16 === 4 ? 1 : s16 === 8 ? 2 : s16 === 11 ? 3 : 1) % prog.lead.length;
+      const note = prog.lead[noteIdx];
+      voice("triangle", note, t, SIXTEENTH * 3.0, 0.12, 0.008, 0.22);
+      voice("sine", note + 12, t, SIXTEENTH * 2.5, 0.06, 0.01, 0.18);
+    }
+    // 3. Ethereal Vocal Hug Aura (Soft sine chord pads on bar starts)
+    if (s16 === 0) {
+      for (let i = 0; i < prog.pad.length; i++) {
+        voice("sine", prog.pad[i] + 12, t, 4 * BEAT, 0.038, 1.5, 2.0);
+      }
+    }
+  };
+
   function scheduleStep(s, t) {
     const bar = (s / 16) | 0;
     const s16 = s % 16;
@@ -1111,7 +1146,12 @@ And we'll be here.
     const prog = activeProg[bar % activeProg.length];
     const plan = barPlan();
 
-    if (currentTrackIdx === 8) {
+    if (currentTrackIdx === 9) {
+      // 💖 Track 10: Time After Time (P!NK x Universal Love & Hug)
+      if (s16 === 0) pad(prog.pad, t);
+      timeAfterTimeLayer(prog, t, s16, bar);
+      if (plan.melAt[s16]) melody(t, SIXTEENTH * 2);
+    } else if (currentTrackIdx === 8) {
       // ☀️ Track 09: Love Is Gonna Save Us (ARTBAT x Benny Benassi x Mr Sunshine)
       if (s16 === 0) pad(prog.pad, t);
       artbatBenassiLayer(prog, t, s16, bar);
@@ -1200,7 +1240,8 @@ And we'll be here.
           "06 GAIA HAS HER WATCHERS (D 432Hz)",
           "07 WISH YOU WERE HERE (G 432Hz)",
           "08 THE FEELING (MASSANO × ULTRALOVE)",
-          "09 LOVE IS GONNA SAVE US (ARTBAT × BENASSI)"
+          "09 LOVE IS GONNA SAVE US (ARTBAT × BENASSI)",
+          "10 TIME AFTER TIME (P!NK × UNIVERSAL LOVE)"
         ];
         if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
       });
@@ -1216,6 +1257,8 @@ And we'll be here.
       } else if (e.key >= "1" && e.key <= "9") {
         const targetIdx = parseInt(e.key, 10) - 1;
         if (pills[targetIdx]) pills[targetIdx].click();
+      } else if (e.key === "0") {
+        if (pills[9]) pills[9].click();
       } else if (e.key === "s" || e.key === "S") {
         const seedBadge = document.getElementById("seed-badge");
         if (seedBadge) seedBadge.click();
@@ -1592,6 +1635,7 @@ else boot();
   const pWraith = document.getElementById("sc-preset-wraith");
   const pMassano = document.getElementById("sc-preset-massano");
   const pArtbat = document.getElementById("sc-preset-artbat");
+  const pPink = document.getElementById("sc-preset-pink");
 
   if (pPeter) {
     pPeter.addEventListener("click", () => {
@@ -1617,6 +1661,12 @@ else boot();
       loadUrl("https://soundcloud.com/artbatmusic/artbat-love-is-gonna-save-us");
     });
   }
+  if (pPink) {
+    pPink.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "pink time after time";
+      loadUrl("https://soundcloud.com/search?q=" + encodeURIComponent("pink time after time"));
+    });
+  }
 
   function doSearch() {
     if (!scFrame) return;
@@ -1629,6 +1679,8 @@ else boot();
       loadUrl("https://soundcloud.com/massanomusic/massano-the-feeling-2022-remaster1");
     } else if (q.includes("artbat") || q.includes("benassi") || q.includes("save us")) {
       loadUrl("https://soundcloud.com/artbatmusic/artbat-love-is-gonna-save-us");
+    } else if (q.includes("pink") || q.includes("time after time")) {
+      loadUrl("https://soundcloud.com/search?q=" + encodeURIComponent(q));
     } else {
       loadUrl("https://soundcloud.com/search?q=" + encodeURIComponent(q));
     }
@@ -1659,6 +1711,29 @@ else boot();
   const lyricsTabs = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".lyrics-tab") : [];
 
   const LYRICS_DATA = {
+    pink: `[Time After Time — P!NK × Cyndi Lauper × Universal Love & Hug]
+[432Hz Heartbeat Diatonic Embrace · Ambient Warmth]
+
+Lying in my bed I hear the clock tick,
+And think of you.
+Caught up in circles confusion
+Is nothing new.
+
+Flashback warm nights,
+Almost left behind.
+Suitcase of memories,
+Time after...
+
+If you're lost you can look and you will find me,
+Time after time.
+If you fall I will catch you, I'll be waiting,
+Time after time.
+
+A universal hug across the distances.
+No matter the cold, no matter the night,
+The heart beats at 432Hz.
+I will catch you.
+Time after time.`,
     artbat: `[Love Is Gonna Save Us — ARTBAT × Benny Benassi × Mr Sunshine]
 [Backyard Ultra of Ultras — 432Hz Pumping Melodic Anthem]
 
