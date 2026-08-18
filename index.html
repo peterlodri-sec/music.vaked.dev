@@ -504,6 +504,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
       <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
+      <span class="badge" id="seed-badge" style="color:#00f0ff;border-color:rgba(0,240,255,.4);cursor:pointer" title="Click to cycle Double Seed: n===0 (https://music.vaked.dev/) ⇄ n===1 (Massano) ⇄ DUAL ☯️">SEED: n===0 (music.vaked.dev)</span>
       <span class="badge">0 + 1</span>
       <span class="badge" id="badge-audio">audio — tap to start</span>
     </div>
@@ -866,8 +867,16 @@ And we'll be here.
 
   window.engine = window.engine || {};
 
-  /* ── identity: the voice is seeded, deterministic, reproducible ── */
-  const SEED = 42;
+  /* ── Double Seed Architecture: n===0 (https://music.vaked.dev/) & n===1 (Massano Counterwave) ── */
+  const SEED_0 = 42;                    // n===0: Sovereign Origin (https://music.vaked.dev/)
+  const SEED_1 = 2022;                  // n===1: Counterwave Seed (Massano — The Feeling 2022 Remaster)
+  let activeSeedMode = 0;               // 0 = Origin (music.vaked.dev), 1 = Counterwave, "dual" = Interlocked Resonance
+
+  function getActiveSeed() {
+    if (activeSeedMode === 1) return SEED_1;
+    return SEED_0;
+  }
+  const SEED = SEED_0;
   const BPM = 76;                       // gentle love-tempo (~72–88)
   const BEAT = 60 / BPM;
   const SIXTEENTH = BEAT / 4;
@@ -958,7 +967,8 @@ And we'll be here.
      finite note times (the node-testable seam); scheduleStep() consumes
      the same per-step grids. Not a decoy: both use barPlan().           */
   function barPlan(seed) {
-    const r = makeLCG(seed === undefined ? SEED : seed);
+    const sVal = (seed === undefined) ? getActiveSeed() : seed;
+    const r = makeLCG(sVal);
     const bassAt = [], melAt = [];
     for (let i = 0; i < 16; i++) {
       bassAt.push(i === 0 || i % 2 === 1);          // beats + offbeats
@@ -1075,12 +1085,19 @@ And we'll be here.
     const prog = activeProg[bar % activeProg.length];
     const plan = barPlan();                       // deterministic per seed
 
-    if (currentTrackIdx === 7) {
-      // ⚡ Track 08 The Feeling (Massano x Ultralovegod) Giga Drop Engine
+    if (activeSeedMode === "dual") {
+      // ☯️ Double Seed: n===0 (Genesis Ambient) + n===1 (Massano Counterwave Drop)
+      if (s16 === 0) pad(prog.pad, t);
+      if (s16 === 0) bonobo(prog.pad, t, prog.root);
+      massanoDropLayer(prog, t, s16, bar);
+      if (plan.melAt[s16]) melody(t, SIXTEENTH * 2);
+    } else if (activeSeedMode === 1 || currentTrackIdx === 7) {
+      // ⚡ Seed 1 / Track 08 The Feeling (Massano x Ultralovegod) Giga Drop Engine
       if (s16 === 0) pad(prog.pad, t);
       massanoDropLayer(prog, t, s16, bar);
       if (plan.melAt[s16]) melody(t, SIXTEENTH * 2);
     } else {
+      // 🌿 Seed 0: Origin (https://music.vaked.dev/)
       if (s16 === 0) pad(prog.pad, t);              // chord on the bar
       if (s16 === 0) bonobo(prog.pad, t, prog.root); // the bonobo under-layer
       if (plan.bassAt[s16]) bass(prog.root, t);     // warm bass line
@@ -1088,7 +1105,52 @@ And we'll be here.
     }
   }
 
+  function setSeedMode(mode) {
+    activeSeedMode = mode;
+    const badge = document.getElementById("seed-badge");
+    if (!badge) return;
+    if (mode === 0) {
+      badge.textContent = "SEED: n===0 (music.vaked.dev)";
+      badge.style.color = "#00f0ff";
+      badge.style.borderColor = "rgba(0,240,255,.4)";
+      badge.style.background = "rgba(0,240,255,.08)";
+    } else if (mode === 1) {
+      badge.textContent = "SEED: n===1 (Massano Counterwave)";
+      badge.style.color = "#ff2a85";
+      badge.style.borderColor = "rgba(255,42,133,.5)";
+      badge.style.background = "rgba(255,42,133,.15)";
+    } else if (mode === "dual") {
+      badge.textContent = "DUAL SEED ☯️: n===0 ⊗ n===1";
+      badge.style.color = "#ffcf5c";
+      badge.style.borderColor = "rgba(255,207,92,.5)";
+      badge.style.background = "rgba(255,207,92,.15)";
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
+    // Check URL params for ?seed=
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const sParam = urlParams.get("seed");
+      if (sParam === "1") setSeedMode(1);
+      else if (sParam === "dual" || sParam === "double") setSeedMode("dual");
+      else if (sParam === "0") setSeedMode(0);
+    } catch (e) {}
+
+    const seedBadge = document.getElementById("seed-badge");
+    if (seedBadge) {
+      seedBadge.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (activeSeedMode === 0) {
+          setSeedMode(1);
+        } else if (activeSeedMode === 1) {
+          setSeedMode("dual");
+        } else {
+          setSeedMode(0);
+        }
+      });
+    }
+
     const pills = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".mode-pill") : [];
     pills.forEach((pill) => {
       pill.addEventListener("click", (e) => {
