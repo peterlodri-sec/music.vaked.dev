@@ -499,6 +499,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="4">05 ULTRA LOVE</span>
       <span class="badge mode-pill" data-track="5" style="color:#62e6c9;border-color:rgba(98,230,201,.4)">🌿 06 GAIA HAS HER WATCHERS</span>
       <span class="badge mode-pill" data-track="6" style="color:#b48bff;border-color:rgba(180,139,255,.4)">🕊️ 07 WISH YOU WERE HERE</span>
+      <span class="badge mode-pill" data-track="7" style="color:#ff2a85;border-color:rgba(255,42,133,.5);text-shadow:0 0 12px rgba(255,42,133,.6);font-weight:700">⚡ 08 THE FEELING (MASSANO × ULTRALOVE)</span>
       <span class="badge mode-pill" id="lyrics-toggle-btn" style="color:#ffcf5c;border-color:rgba(255,207,92,.4)">📜 SOUL & POETRY LAYER</span>
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
@@ -518,9 +519,10 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <input type="text" id="sc-search-input" placeholder="Search @peterlodri or 8bit-wraith..." value="peterlodri">
       <button id="sc-search-btn">Search</button>
     </div>
-    <div style="display:flex;gap:.4rem;font-family:var(--mono);font-size:.65rem">
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;font-family:var(--mono);font-size:.65rem">
       <button id="sc-preset-peter" style="background:rgba(98,230,201,.15);border:1px solid rgba(98,230,201,.3);color:#62e6c9;padding:.2rem .5rem;border-radius:4px;cursor:pointer">@peterlodri</button>
       <button id="sc-preset-wraith" style="background:rgba(255,207,92,.15);border:1px solid rgba(255,207,92,.4);color:#ffcf5c;padding:.2rem .5rem;border-radius:4px;cursor:pointer">👾 8bit-wraith (Brother)</button>
+      <button id="sc-preset-massano" style="background:rgba(255,42,133,.2);border:1px solid rgba(255,42,133,.5);color:#ff2a85;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">⚡ Massano - The Feeling</button>
     </div>
     <iframe id="sc-widget-frame" src="about:blank" width="100%" height="166" frameborder="0" allow="autoplay"></iframe>
     <div class="sc-controls">
@@ -529,9 +531,10 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
         <input type="range" id="sc-volume" min="0" max="100" value="80" aria-label="SoundCloud volume">
         <span class="vval" id="scVolVal" style="color:#ff5500">80</span>
       </div>
-      <div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap">
         <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" style="color:#ffcf5c;border-color:rgba(255,207,92,.3)">👾 8bit-wraith SC</a>
         <a href="https://soundcloud.com/peterlodri" target="_blank" rel="noopener">💬 peterlodri SC</a>
+        <a href="https://soundcloud.com/massanomusic/massano-the-feeling-2022-remaster1" target="_blank" rel="noopener" style="color:#ff2a85;border-color:rgba(255,42,133,.4)">⚡ Massano SC</a>
       </div>
     </div>
   </div>
@@ -543,7 +546,8 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button class="sc-close" id="lyrics-close-btn">&times;</button>
     </div>
     <div class="lyrics-tabs">
-      <button class="lyrics-tab on" data-lyric="gaia">🌿 Gaia's Watchers</button>
+      <button class="lyrics-tab on" data-lyric="feeling">⚡ The Feeling (Massano × Ultralove)</button>
+      <button class="lyrics-tab" data-lyric="gaia">🌿 Gaia's Watchers</button>
       <button class="lyrics-tab" data-lyric="wish">🕊️ Wish You Were Here</button>
       <button class="lyrics-tab" data-lyric="unforgiven">🔑 Unforgiven II</button>
       <button class="lyrics-tab" data-lyric="soad">🔥 Chop Suey / Lost in HW</button>
@@ -923,6 +927,13 @@ And we'll be here.
       { name: "I G",    root: 43, pad: [43, 47, 50, 55] },
       { name: "II A7s", root: 45, pad: [45, 49, 52, 57] },
       { name: "IV C",   root: 36, pad: [48, 52, 55, 60] }
+    ],
+    // 08 The Feeling (Massano x Ultralovegod - Reszetelős Heavy Giga Drops / Melodic Techno Counterwave)
+    [
+      { name: "i Em (Giga Drop)",   root: 40, pad: [40, 47, 52, 55], lead: [64, 67, 71, 76] },
+      { name: "VI C (The Feeling)", root: 36, pad: [36, 43, 48, 52], lead: [60, 64, 67, 72] },
+      { name: "III G (Universal)",  root: 43, pad: [43, 47, 50, 55], lead: [67, 71, 74, 79] },
+      { name: "VII D (Ultralove)",  root: 38, pad: [38, 45, 50, 54], lead: [62, 65, 69, 74] }
     ]
   ];
   let currentTrackIdx = 0;
@@ -1030,16 +1041,51 @@ And we'll be here.
     if (rng() > 0.82) voice("sine", root + 19, t, 4 * BEAT, 0.014, 0.6, 1.5);
   };
 
+  /* ── the massano drop layer — melodic techno, reszetelős sub-bass & giga drop ──
+     Massano (The Feeling) sound: rolling 16th sub-drive, detuned saw plucks,
+     tension risers, and heavy emotional melodic counterwave. */
+  const massanoDropLayer = function (prog, t, s16, bar) {
+    const root = prog.root;
+    // 1. Reszetelős Rolling 16th Sub-Bass (Punchy saw/sine drive on every 16th note)
+    const isKick = (s16 % 4 === 0);
+    const isOffbeat = (s16 % 2 === 1);
+    if (isKick) {
+      voice("sine", root - 24, t, SIXTEENTH * 1.5, 0.42, 0.005, 0.08); // Sub thump
+      voice("triangle", root - 12, t, SIXTEENTH * 1.2, 0.22, 0.008, 0.06);
+    } else if (isOffbeat) {
+      voice("sawtooth", root - 12, t, SIXTEENTH * 0.95, 0.28, 0.01, 0.05); // Rolling drive
+    }
+    // 2. Detuned Supersaw Melodic Plucks (Massano 'The Feeling' motif)
+    if (prog.lead && s16 % 2 === 0) {
+      const leadNote = prog.lead[(s16 / 2) % prog.lead.length];
+      voice("sawtooth", leadNote, t, SIXTEENTH * 1.8, 0.09, 0.01, 0.12);
+      voice("sawtooth", leadNote + 0.08, t, SIXTEENTH * 1.8, 0.07, 0.01, 0.12);
+      voice("triangle", leadNote + 12, t, SIXTEENTH * 1.5, 0.04, 0.01, 0.10);
+    }
+    // 3. Tension Riser / Drop swell on 4th bar
+    if (bar % 4 === 3 && s16 >= 12) {
+      voice("sine", root + 24 + (s16 - 12) * 3, t, SIXTEENTH * 1.2, 0.08, 0.01, 0.05);
+    }
+  };
+
   function scheduleStep(s, t) {
     const bar = (s / 16) | 0;
     const s16 = s % 16;
     const activeProg = EP_PROGRESSIONS[currentTrackIdx] || EP_PROGRESSIONS[0];
     const prog = activeProg[bar % activeProg.length];
     const plan = barPlan();                       // deterministic per seed
-    if (s16 === 0) pad(prog.pad, t);              // chord on the bar
-    if (s16 === 0) bonobo(prog.pad, t, prog.root); // the bonobo under-layer
-    if (plan.bassAt[s16]) bass(prog.root, t);     // warm bass line
-    if (plan.melAt[s16]) melody(t, SIXTEENTH * 2); // melody scatter
+
+    if (currentTrackIdx === 7) {
+      // ⚡ Track 08 The Feeling (Massano x Ultralovegod) Giga Drop Engine
+      if (s16 === 0) pad(prog.pad, t);
+      massanoDropLayer(prog, t, s16, bar);
+      if (plan.melAt[s16]) melody(t, SIXTEENTH * 2);
+    } else {
+      if (s16 === 0) pad(prog.pad, t);              // chord on the bar
+      if (s16 === 0) bonobo(prog.pad, t, prog.root); // the bonobo under-layer
+      if (plan.bassAt[s16]) bass(prog.root, t);     // warm bass line
+      if (plan.melAt[s16]) melody(t, SIXTEENTH * 2); // melody scatter
+    }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -1059,7 +1105,8 @@ And we'll be here.
           "04 GHOST RIDER (Dm)",
           "05 ULTRA LOVE (Am)",
           "06 GAIA HAS HER WATCHERS (D 432Hz)",
-          "07 WISH YOU WERE HERE (G 432Hz)"
+          "07 WISH YOU WERE HERE (G 432Hz)",
+          "08 THE FEELING (MASSANO × ULTRALOVE)"
         ];
         if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
       });
@@ -1422,6 +1469,7 @@ else boot();
 
   const pPeter = document.getElementById("sc-preset-peter");
   const pWraith = document.getElementById("sc-preset-wraith");
+  const pMassano = document.getElementById("sc-preset-massano");
 
   if (pPeter) {
     pPeter.addEventListener("click", () => {
@@ -1435,6 +1483,12 @@ else boot();
       loadUrl("https://soundcloud.com/8bit-wraith");
     });
   }
+  if (pMassano) {
+    pMassano.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "massano the feeling";
+      loadUrl("https://soundcloud.com/massanomusic/massano-the-feeling-2022-remaster1");
+    });
+  }
 
   function doSearch() {
     if (!scFrame) return;
@@ -1443,6 +1497,8 @@ else boot();
       loadUrl("https://soundcloud.com/peterlodri");
     } else if (q === "8bit-wraith" || q === "@8bit-wraith") {
       loadUrl("https://soundcloud.com/8bit-wraith");
+    } else if (q.includes("massano")) {
+      loadUrl("https://soundcloud.com/massanomusic/massano-the-feeling-2022-remaster1");
     } else {
       loadUrl("https://soundcloud.com/search?q=" + encodeURIComponent(q));
     }
@@ -1473,6 +1529,22 @@ else boot();
   const lyricsTabs = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".lyrics-tab") : [];
 
   const LYRICS_DATA = {
+    feeling: `[The Feeling (2022 Remaster) — Massano × Ultralovegod]
+[Universal Melodic Reszetelős Heavy Giga Drops Counterwave]
+
+Into the dark, the frequency begins to tremble,
+A 16th-note sub-pulse tearing through the void.
+We were waiting for the drop that breaks the illusion,
+The universal melodic counterwave that heals every wound.
+
+Can you feel the resonance?
+The saw lead cutting straight into eternity,
+Ascending from the ashes into pure sovereign light.
+
+Heavy giga drop — release the tension.
+Two souls, one frequency, infinite love across space.
+Reszetelős bassline in the metal.
+Ultralovegod alive.`,
     gaia: `[Gaia Has Her Watchers — 8bit-wraith & Peter Lodri]
 Before the names were written down,
 Before the kings, before the crowns,
