@@ -67,7 +67,7 @@ def run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str]:
 
 
 def extract_scripts(html: str) -> list[str]:
-    return [m.group(1) for m in re.finditer(r'<script(?![^>]*src=)[^>]*>([\s\S]*?)</script>', html)]
+    return [m.group(1) for m in re.finditer(r'<script(?![^>]*src=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)</script>', html, re.IGNORECASE)]
 
 
 def structural_gates(issues: list[str]) -> bool:
