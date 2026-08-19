@@ -603,7 +603,7 @@ And we'll be here.
     </div>
     <div class="volume" id="zoomWrap" title="POV — behind eBPF, from within, by unknown POV">
       <span class="vlabel">zoom</span>
-      <input type="range" id="zoom" min="2" max="10" step="0.1" value="9" aria-label="sphere POV zoom">
+      <input type="range" id="zoom" min="-8" max="42" step="0.1" value="9" aria-label="sphere POV zoom">
       <span class="vval" id="zoomVal">9</span>
     </div>
     <div class="support">
@@ -668,6 +668,12 @@ And we'll be here.
   let reducedMQ = null;
   const isReduced = () => (reducedMQ ? reducedMQ.matches : false);
 
+  // Celestial Extensions: Polar Spheres, Black Holes, Orbiters, Gravitational Waves
+  let polarNorth, polarSouth, polarJets;
+  let blackHole, photonRing, accretionDisk, accretionGeo;
+  let orbiterAlpha, orbiterBeta, tidalBridge, gravRings = [];
+  let currentZoom = 9, targetZoom = 9;
+
   /* pure spread curve — frozen contract: monotonic in energy ∈ [0,1], returns a number */
   function setSpread(energy) {
     const e = Math.max(0, Math.min(1, energy));
@@ -701,8 +707,9 @@ And we'll be here.
     else n = Math.round(2048 * Math.min(dpr, 1.5));
 
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 250);
     camera.position.z = 9;
+    camera.lookAt(0, 0, 0);
 
     renderer = new THREE.WebGLRenderer({ antialias: !isReduced(), alpha: true, powerPreference: "high-performance" });
     renderer.setPixelRatio(dpr);
@@ -711,22 +718,22 @@ And we'll be here.
 
     // background constellation field
     const fieldGeo = new THREE.BufferGeometry();
-    const fcount = 600;
+    const fcount = 750;
     const fpos = new Float32Array(fcount * 3);
     for (let i = 0; i < fcount; i++) {
-      fpos[i * 3] = (Math.random() - 0.5) * 40;
-      fpos[i * 3 + 1] = (Math.random() - 0.5) * 40;
-      fpos[i * 3 + 2] = (Math.random() - 0.5) * 40;
+      fpos[i * 3] = (Math.random() - 0.5) * 80;
+      fpos[i * 3 + 1] = (Math.random() - 0.5) * 80;
+      fpos[i * 3 + 2] = (Math.random() - 0.5) * 80;
     }
     fieldGeo.setAttribute("position", new THREE.BufferAttribute(fpos, 3));
     const fieldMat = new THREE.PointsMaterial({
-      color: 0x62e6c9, size: 0.03, transparent: true, opacity: 0.35,
+      color: 0x62e6c9, size: 0.04, transparent: true, opacity: 0.35,
       blending: THREE.AdditiveBlending, depthWrite: false,
     });
     const field = new THREE.Points(fieldGeo, fieldMat);
     scene.add(field);
 
-    // the main sphere shell
+    // ── The Main Fibonacci Sphere Shell ──────────────────────────────────
     base = fibonacciSphere(n);
     phase = [];
     const positions = new Float32Array(n * 3);
@@ -753,7 +760,7 @@ And we'll be here.
     points = new THREE.Points(geo, material);
     scene.add(points);
 
-    // 3D Audio-Reactive Wireframe Icosahedron Overlay
+    // ── 3D Audio-Reactive Wireframe Icosahedron ───────────────────────────
     const icoGeo = new THREE.IcosahedronGeometry(2.2, 2);
     const icoMat = new THREE.MeshBasicMaterial({
       color: 0x62e6c9, wireframe: true, transparent: true, opacity: 0.25,
@@ -762,7 +769,130 @@ And we'll be here.
     window.icoMesh = new THREE.Mesh(icoGeo, icoMat);
     scene.add(window.icoMesh);
 
-    // pointer drag → rotate the constellation (a hint; it keeps its own life)
+    // ── 1. Black Hole Core & Relativistic Accretion Disk ──────────────────
+    const bhGeo = new THREE.SphereGeometry(0.78, 32, 32);
+    const bhMat = new THREE.MeshBasicMaterial({
+      color: 0x05060b,
+      transparent: true,
+      opacity: 0.96
+    });
+    blackHole = new THREE.Mesh(bhGeo, bhMat);
+    scene.add(blackHole);
+
+    // Lensing Photon Sphere Ring
+    const prGeo = new THREE.TorusGeometry(0.95, 0.03, 16, 100);
+    const prMat = new THREE.MeshBasicMaterial({
+      color: 0xffd36e,
+      wireframe: false,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    photonRing = new THREE.Mesh(prGeo, prMat);
+    photonRing.rotation.x = Math.PI * 0.45;
+    scene.add(photonRing);
+
+    // Swirling Relativistic Accretion Disk Particles
+    const accCount = 500;
+    accretionGeo = new THREE.BufferGeometry();
+    const accPos = new Float32Array(accCount * 3);
+    const accCol = new Float32Array(accCount * 3);
+    const colInner = new THREE.Color(0xffaa44);
+    const colOuter = new THREE.Color(0x62e6c9);
+    for (let i = 0; i < accCount; i++) {
+      const radius = 1.05 + Math.pow(Math.random(), 1.6) * 2.8;
+      const angle = Math.random() * Math.PI * 2;
+      accPos[i * 3] = Math.cos(angle) * radius;
+      accPos[i * 3 + 1] = (Math.random() - 0.5) * 0.18;
+      accPos[i * 3 + 2] = Math.sin(angle) * radius;
+      const f = (radius - 1.05) / 2.8;
+      const c = colInner.clone().lerp(colOuter, f);
+      accCol[i * 3] = c.r; accCol[i * 3 + 1] = c.g; accCol[i * 3 + 2] = c.b;
+    }
+    accretionGeo.setAttribute("position", new THREE.BufferAttribute(accPos, 3));
+    accretionGeo.setAttribute("color", new THREE.BufferAttribute(accCol, 3));
+    const accMat = new THREE.PointsMaterial({
+      size: 0.065, vertexColors: true, transparent: true, opacity: 0.88,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    accretionDisk = new THREE.Points(accretionGeo, accMat);
+    accretionDisk.rotation.x = Math.PI * 0.15;
+    scene.add(accretionDisk);
+
+    // ── 2. North and South Polar Spheres & Aurora Jets ────────────────────
+    function makePolarCluster(count, colorHex) {
+      const pBase = fibonacciSphere(count);
+      const pos = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        pos[i * 3] = pBase[i].x * 0.75;
+        pos[i * 3 + 1] = pBase[i].y * 0.75;
+        pos[i * 3 + 2] = pBase[i].z * 0.75;
+      }
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      const pMat = new THREE.PointsMaterial({
+        color: colorHex, size: 0.055, transparent: true, opacity: 0.9,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      });
+      return new THREE.Points(pGeo, pMat);
+    }
+    polarNorth = makePolarCluster(160, 0x62e6c9);
+    polarSouth = makePolarCluster(160, 0xb48bff);
+    scene.add(polarNorth);
+    scene.add(polarSouth);
+
+    // Polar Jets
+    const jetCount = 180;
+    const jetPos = new Float32Array(jetCount * 3);
+    for (let i = 0; i < jetCount; i++) {
+      const sign = i % 2 === 0 ? 1 : -1;
+      const y = (0.8 + Math.random() * 4.5) * sign;
+      const spreadY = (Math.abs(y) - 0.8) * 0.12;
+      jetPos[i * 3] = (Math.random() - 0.5) * spreadY;
+      jetPos[i * 3 + 1] = y;
+      jetPos[i * 3 + 2] = (Math.random() - 0.5) * spreadY;
+    }
+    const jetGeo = new THREE.BufferGeometry();
+    jetGeo.setAttribute("position", new THREE.BufferAttribute(jetPos, 3));
+    const jetMat = new THREE.PointsMaterial({
+      color: 0xffd36e, size: 0.045, transparent: true, opacity: 0.75,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    polarJets = new THREE.Points(jetGeo, jetMat);
+    scene.add(polarJets);
+
+    // ── 3. Binary Orbiting Companion Spheres & Tidal Bridge ───────────────
+    orbiterAlpha = makePolarCluster(180, 0xff70b8);
+    orbiterBeta = makePolarCluster(180, 0x38bdf8);
+    scene.add(orbiterAlpha);
+    scene.add(orbiterBeta);
+
+    // Tidal Bridge Particle Stream
+    const bridgeCount = 120;
+    const bridgePos = new Float32Array(bridgeCount * 3);
+    const bridgeGeo = new THREE.BufferGeometry();
+    bridgeGeo.setAttribute("position", new THREE.BufferAttribute(bridgePos, 3));
+    const bridgeMat = new THREE.PointsMaterial({
+      color: 0xffe277, size: 0.04, transparent: true, opacity: 0.65,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    tidalBridge = new THREE.Points(bridgeGeo, bridgeMat);
+    scene.add(tidalBridge);
+
+    // Gravitational Waves Ripple Rings
+    for (let r = 0; r < 4; r++) {
+      const ringGeo = new THREE.RingGeometry(1.8 + r * 1.6, 1.86 + r * 1.6, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0x62e6c9, side: THREE.DoubleSide, transparent: true, opacity: 0.12,
+        blending: THREE.AdditiveBlending
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI * 0.5;
+      scene.add(ring);
+      gravRings.push(ring);
+    }
+
+    // ── Controls & Zoom Range [-8, 42] ────────────────────────────────────
     const el = renderer.domElement;
     el.addEventListener("pointerdown", (ev) => {
       drag = true; dx = ev.clientX; dy = ev.clientY;
@@ -779,8 +909,21 @@ And we'll be here.
     const endDrag = () => { drag = false; };
     el.addEventListener("pointerup", endDrag);
     el.addEventListener("pointercancel", endDrag);
+
+    // Mouse Wheel Zoom [-8, 42]
+    el.addEventListener("wheel", (ev) => {
+      ev.preventDefault();
+      const delta = ev.deltaY * 0.025;
+      targetZoom = Math.max(-8, Math.min(42, targetZoom + delta));
+      if (window.engine && window.engine.setZoom) window.engine.setZoom(targetZoom);
+      const zInput = document.getElementById("zoom");
+      const zVal = document.getElementById("zoomVal");
+      if (zInput) zInput.value = targetZoom.toFixed(1);
+      if (zVal) zVal.textContent = targetZoom.toFixed(1);
+    }, { passive: false });
+
     el.addEventListener("webglcontextlost", (ev) => {
-      ev.preventDefault(); // Three re-inits context on restore
+      ev.preventDefault();
     });
     window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -807,8 +950,6 @@ And we'll be here.
     const drift = reduced ? 0 : 0.05;
     for (let i = 0; i < n; i++) {
       const b = base[i];
-      // surface-coherent wave: keyed to the intrinsic y-coordinate (the 2D
-      // surface param), plus a small random life term for organic motion
       const surf = Math.sin(b.y * 6.0 + t * 0.6 + phase[i] * 0.4) * 0.5 + 0.5;
       const sway = Math.sin(t * 0.6 + phase[i]) * idleSway + surf * drift;
       const r = maxR * (1 + sway * (0.35 + energy * 1.4));
@@ -824,6 +965,99 @@ And we'll be here.
     points.rotation.y = spin + rotY;
     points.rotation.x = rotX;
 
+    // ── 1. Update Black Hole & Accretion Disk ──────────────────────────
+    if (blackHole) {
+      const bhScale = (1.0 + energy * 0.4) * (1.0 - Math.sin(t * 1.8) * 0.05);
+      blackHole.scale.set(bhScale, bhScale, bhScale);
+    }
+    if (photonRing) {
+      photonRing.rotation.z += dt * 0.4;
+      photonRing.rotation.y = spin * 0.3;
+      const prPulse = 0.6 + 0.4 * Math.sin(t * 3.0 + energy * 4.0);
+      if (photonRing.material) photonRing.material.opacity = 0.35 + prPulse * 0.5;
+    }
+    if (accretionDisk && accretionGeo) {
+      accretionDisk.rotation.y = spin * 1.5;
+      const accPos = accretionGeo.attributes.position.array;
+      for (let i = 0; i < accPos.length / 3; i++) {
+        const x = accPos[i * 3], z = accPos[i * 3 + 2];
+        const rad = Math.sqrt(x * x + z * z);
+        const angSpeed = (2.2 / Math.max(0.8, Math.pow(rad, 1.2))) * dt * (1 + energy * 2.0);
+        const cosA = Math.cos(angSpeed), sinA = Math.sin(angSpeed);
+        accPos[i * 3] = x * cosA - z * sinA;
+        accPos[i * 3 + 2] = x * sinA + z * cosA;
+        accPos[i * 3 + 1] = Math.sin(t * 2.0 + rad * 3.0) * (0.08 + energy * 0.18);
+      }
+      accretionGeo.attributes.position.needsUpdate = true;
+    }
+
+    // ── 2. Update Polar Spheres & Aurora Jets ──────────────────────────
+    const polarY = maxR * 1.25 + 0.5 * Math.sin(t * 1.2);
+    if (polarNorth) {
+      polarNorth.position.set(0, polarY, 0);
+      polarNorth.rotation.y = -spin * 1.8;
+      const ps = 0.85 + energy * 0.75;
+      polarNorth.scale.set(ps, ps, ps);
+    }
+    if (polarSouth) {
+      polarSouth.position.set(0, -polarY, 0);
+      polarSouth.rotation.y = spin * 1.8;
+      const ps = 0.85 + energy * 0.75;
+      polarSouth.scale.set(ps, ps, ps);
+    }
+    if (polarJets) {
+      polarJets.rotation.y = spin * 0.8;
+      const jScale = 1.0 + energy * 1.2;
+      polarJets.scale.set(jScale, 1.0 + spread * 0.8, jScale);
+    }
+
+    // ── 3. Update Binary Orbiters & Gravitational Merges ───────────────
+    const orbitAngle = t * 0.75;
+    const orbitDist = (3.8 + 1.8 * Math.cos(t * 0.35)) * (1.0 - energy * 0.45);
+    const alphaX = Math.cos(orbitAngle) * orbitDist;
+    const alphaZ = Math.sin(orbitAngle) * orbitDist;
+    const alphaY = Math.sin(orbitAngle * 2.0) * 0.85;
+
+    if (orbiterAlpha) {
+      orbiterAlpha.position.set(alphaX, alphaY, alphaZ);
+      orbiterAlpha.rotation.y = spin * 2.2;
+      const os = 0.9 + energy * 0.8;
+      orbiterAlpha.scale.set(os, os, os);
+    }
+    if (orbiterBeta) {
+      orbiterBeta.position.set(-alphaX, -alphaY, -alphaZ);
+      orbiterBeta.rotation.y = -spin * 2.2;
+      const os = 0.9 + energy * 0.8;
+      orbiterBeta.scale.set(os, os, os);
+    }
+
+    // Tidal Bridge stream interpolation between Alpha and Beta
+    if (tidalBridge) {
+      const bPos = tidalBridge.geometry.attributes.position.array;
+      const count = bPos.length / 3;
+      for (let i = 0; i < count; i++) {
+        const frac = i / (count - 1);
+        const px = alphaX * (1 - 2 * frac);
+        const py = alphaY * (1 - 2 * frac) + Math.sin(t * 4.0 + frac * 12.0) * (0.2 + energy * 0.4);
+        const pz = alphaZ * (1 - 2 * frac);
+        bPos[i * 3] = px;
+        bPos[i * 3 + 1] = py;
+        bPos[i * 3 + 2] = pz;
+      }
+      tidalBridge.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // Expanding Gravitational Waves Ripple Rings
+    for (let r = 0; r < gravRings.length; r++) {
+      const ring = gravRings[r];
+      const expansion = ((t * 0.8 + r * 1.5) % 6.0);
+      const s = 1.0 + expansion * 1.6 + energy * 2.0;
+      ring.scale.set(s, s, s);
+      if (ring.material) {
+        ring.material.opacity = Math.max(0, (1 - expansion / 6.0) * (0.15 + energy * 0.35));
+      }
+    }
+
     if (window.icoMesh) {
       window.icoMesh.rotation.y = -spin * 0.7 + rotY;
       window.icoMesh.rotation.x = -rotX * 0.8 + Math.sin(t * 0.5) * 0.2;
@@ -834,10 +1068,16 @@ And we'll be here.
       }
     }
 
+    // Smooth camera zoom interpolation
+    if (camera) {
+      currentZoom += (targetZoom - currentZoom) * Math.min(1, dt * 8);
+      camera.position.z = currentZoom;
+      camera.lookAt(0, 0, 0);
+    }
+
     try {
       if (renderer && scene && camera) renderer.render(scene, camera);
     } catch (err) {
-      // never let a WebGL hiccup kill the animation loop
       console.warn("render:", err);
     }
   }
@@ -847,7 +1087,13 @@ And we'll be here.
   window.engine.__sphereRender = render;
   window.engine.render = render;
   window.engine.setSpread = setSpread;
-  window.engine.setZoom = function (z) { if (camera) camera.position.z = z; };
+  window.engine.setZoom = function (z) {
+    targetZoom = Math.max(-8, Math.min(42, Number(z)));
+    if (camera) {
+      camera.position.z = targetZoom;
+      camera.lookAt(0, 0, 0);
+    }
+  };
   window.engine.__sphereCam = camera;
 })();
 </script>
