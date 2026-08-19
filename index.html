@@ -180,6 +180,54 @@
   .lyrics-tab{background:rgba(255,207,92,.1); border:1px solid rgba(255,207,92,.25); color:var(--warn); padding:.25rem .55rem; border-radius:6px; cursor:pointer; transition:background .15s}
   .lyrics-tab:hover, .lyrics-tab.on{background:rgba(255,207,92,.3); color:#fff; border-color:var(--warn)}
 
+  /* ── Live Waveform & Spectrum Panel ──────────────── */
+  .waveform-panel{
+    position:fixed; top:5.2rem; right:2rem; width:min(440px, calc(100vw - 4rem));
+    background:rgba(8,10,18,.94); border:1px solid rgba(0,240,255,.35);
+    border-radius:14px; padding:1.2rem; z-index:30;
+    backdrop-filter:blur(18px);
+    box-shadow:0 8px 32px rgba(0,0,0,.75), 0 0 25px rgba(0,240,255,.15);
+    display:none; flex-direction:column; gap:.9rem; pointer-events:auto;
+    transition:opacity .25s, transform .25s;
+  }
+  .waveform-panel.open{display:flex}
+  .waveform-header{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:.75rem; letter-spacing:.18em; color:#00f0ff; text-transform:uppercase}
+  #waveform-canvas{width:100%; height:110px; background:rgba(0,10,20,.6); border:1px solid rgba(0,240,255,.2); border-radius:8px; display:block}
+  .tension-bar-wrap{display:flex; flex-direction:column; gap:.3rem; font-family:var(--mono); font-size:.65rem; color:#ffd700}
+  .tension-track{width:100%; height:6px; background:rgba(255,215,0,.12); border:1px solid rgba(255,215,0,.3); border-radius:3px; overflow:hidden}
+  .tension-fill{height:100%; width:88%; background:linear-gradient(90deg, #62e6c9, #ffd700, #ff2a85); transition:width .1s}
+
+  /* ── 42+1+<3 Layers Matrix Panel ─────────────────── */
+  .layers-panel{
+    position:fixed; top:5.2rem; left:50%; transform:translateX(-50%); width:min(560px, calc(100vw - 3rem)); max-height:calc(100vh - 10rem);
+    background:rgba(9,10,20,.95); border:1px solid rgba(255,215,0,.4);
+    border-radius:16px; padding:1.3rem; z-index:35;
+    backdrop-filter:blur(22px);
+    box-shadow:0 12px 40px rgba(0,0,0,.8), 0 0 35px rgba(255,215,0,.18);
+    display:none; flex-direction:column; gap:.9rem; pointer-events:auto;
+    overflow-y:auto; transition:opacity .25s, transform .25s;
+  }
+  .layers-panel.open{display:flex}
+  .layers-header{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:.78rem; letter-spacing:.18em; color:#ffd700; text-transform:uppercase}
+  .layer-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:.5rem; font-family:var(--mono); font-size:.64rem}
+  .layer-card{background:rgba(255,215,0,.04); border:1px solid rgba(255,215,0,.18); border-radius:8px; padding:.6rem; display:flex; flex-direction:column; gap:.25rem}
+  .layer-card .l-num{color:#62e6c9; font-weight:700}
+  .layer-card .l-name{color:#f1f5f9}
+  .layer-card .l-tag{color:#a59fc4; font-size:.56rem}
+
+  /* ── Cover Art Modal Panel ───────────────────────── */
+  .cover-panel{
+    position:fixed; top:5.2rem; right:2rem; width:min(400px, calc(100vw - 4rem));
+    background:rgba(8,9,16,.96); border:1px solid rgba(224,169,109,.4);
+    border-radius:14px; padding:1.2rem; z-index:30;
+    backdrop-filter:blur(20px);
+    box-shadow:0 10px 36px rgba(0,0,0,.8), 0 0 28px rgba(224,169,109,.2);
+    display:none; flex-direction:column; gap:.8rem; pointer-events:auto;
+    transition:opacity .25s, transform .25s;
+  }
+  .cover-panel.open{display:flex}
+  .cover-header{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:.75rem; letter-spacing:.18em; color:#e0a96d; text-transform:uppercase}
+
 
 
 
@@ -524,6 +572,10 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="8" style="color:#ffd700;border-color:rgba(255,215,0,.5);text-shadow:0 0 12px rgba(255,215,0,.6);font-weight:700">☀️ 09 LOVE IS GONNA SAVE US (ARTBAT × BENASSI)</span>
       <span class="badge mode-pill" data-track="9" style="color:#ff758c;border-color:rgba(255,117,140,.5);text-shadow:0 0 12px rgba(255,117,140,.6);font-weight:700">💖 10 TIME AFTER TIME (P!NK × UNIVERSAL LOVE)</span>
       <span class="badge mode-pill" data-track="10" style="color:#00f0ff;border-color:rgba(0,240,255,.5);text-shadow:0 0 12px rgba(0,240,255,.6);font-weight:700">🏜️ 11 RÜFÜS DU SOL (JOSHUA TREE × HEUREKA)</span>
+      <span class="badge mode-pill" data-track="11" style="color:#ff6432;border-color:rgba(255,100,50,.5);text-shadow:0 0 12px rgba(255,100,50,.6);font-weight:700">🔨 12 ANVIL (LORN × DEEP HOUSE — NO DROP)</span>
+      <span class="badge mode-pill" id="layers-toggle-btn" style="color:#ffd700;border-color:rgba(255,215,0,.4)">✨ 42 + 1 + &lt;3 LAYERS</span>
+      <span class="badge mode-pill" id="waveform-toggle-btn" style="color:#00f0ff;border-color:rgba(0,240,255,.4)">〰️ WAVEFORM &amp; WAV</span>
+      <span class="badge mode-pill" id="cover-toggle-btn" style="color:#e0a96d;border-color:rgba(224,169,109,.4)">🖼️ COVER ART</span>
       <span class="badge mode-pill" id="lyrics-toggle-btn" style="color:#ffcf5c;border-color:rgba(255,207,92,.4)">📜 SOUL & POETRY LAYER</span>
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
@@ -533,6 +585,65 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" id="header-toggle-btn" style="color:#62e6c9;border-color:rgba(98,230,201,.4);cursor:pointer" title="Toggle header collapse">⛶ COLLAPSE</span>
       <span class="badge">0 + 1</span>
       <span class="badge" id="badge-audio">audio — tap to start</span>
+    </div>
+  </div>
+
+  <!-- Live Waveform & 24-bit WAV Exporter Drawer -->
+  <div class="waveform-panel" id="waveform-panel">
+    <div class="waveform-header">
+      <span>〰️ Realtime Waveform &amp; WAV Master</span>
+      <button class="sc-close" id="waveform-close-btn">&times;</button>
+    </div>
+    <canvas id="waveform-canvas" width="400" height="110"></canvas>
+    <div class="tension-bar-wrap">
+      <div style="display:flex;justify-content:space-between">
+        <span>DROP TENSION (SUSPENDED ACCELERATION)</span>
+        <span id="tension-pct" style="font-weight:bold;color:#ff2a85">88.4%</span>
+      </div>
+      <div class="tension-track">
+        <div class="tension-fill" id="tension-fill"></div>
+      </div>
+      <div style="font-size:0.58rem;color:#a59fc4;letter-spacing:0.05em">ANVIL ENGINE: INFINITE TENSION SWELL · TEETERING ON THE BRINK · NEVER DROPS</div>
+    </div>
+    <div style="display:flex;gap:0.6rem;justify-content:space-between;align-items:center;flex-wrap:wrap">
+      <button id="wav-export-btn" class="badge mode-pill on" style="background:rgba(98,230,201,.18);color:#62e6c9;border-color:#62e6c9;padding:6px 14px;cursor:pointer;font-weight:700">💾 EXPORT 24-BIT MASTER WAV</button>
+      <span id="wav-status" style="font-family:var(--mono);font-size:0.62rem;color:#ffd700"></span>
+    </div>
+  </div>
+
+  <!-- 42+1+<3 Layers Matrix Drawer -->
+  <div class="layers-panel" id="layers-panel">
+    <div class="layers-header">
+      <span>✨ 42 + 1 + &lt;3 Harmonic Layer Architecture</span>
+      <button class="sc-close" id="layers-close-btn">&times;</button>
+    </div>
+    <div style="font-family:var(--mono);font-size:0.68rem;color:#a59fc4;line-height:1.6">
+      Every frequency on <b style="color:#62e6c9">music.vaked.dev</b> is live synthesized across <b>44 sovereign acoustic &amp; spatial layers</b> (42 Matrix + 1 Barycenter + &lt;3 Sovereign Love Constant).
+    </div>
+    <div class="layer-grid">
+      <div class="layer-card"><span class="l-num">01–08</span><span class="l-name">Core Frequencies</span><span class="l-tag">432Hz Carrier &amp; Sub</span></div>
+      <div class="layer-card"><span class="l-num">09–16</span><span class="l-name">Diatonic Pads</span><span class="l-tag">Love-Triads &amp; Saw/Tri</span></div>
+      <div class="layer-card"><span class="l-num">17–24</span><span class="l-name">Lorn Suspensions</span><span class="l-tag">Tape Flutter &amp; Reeses</span></div>
+      <div class="layer-card"><span class="l-num">25–32</span><span class="l-name">Accretion &amp; Gravity</span><span class="l-tag">Kepler Orbiters &amp; Rings</span></div>
+      <div class="layer-card"><span class="l-num">33–40</span><span class="l-name">Celestial Geometry</span><span class="l-tag">Fibonacci &amp; Polar Spheres</span></div>
+      <div class="layer-card"><span class="l-num">41–42</span><span class="l-name">Anvil Tension</span><span class="l-tag">Exponential High Riser</span></div>
+      <div class="layer-card" style="border-color:#62e6c9"><span class="l-num">+1</span><span class="l-name">Universal Barycenter</span><span class="l-tag">0 + 1 Determinism</span></div>
+      <div class="layer-card" style="border-color:#ff2a85"><span class="l-num">&lt;3</span><span class="l-name">Sovereign Love</span><span class="l-tag">Infinite Resonance</span></div>
+    </div>
+  </div>
+
+  <!-- Cover Art Viewer Modal Drawer -->
+  <div class="cover-panel" id="cover-panel">
+    <div class="cover-header">
+      <span>🖼️ Anvil — Cover Art</span>
+      <button class="sc-close" id="cover-close-btn">&times;</button>
+    </div>
+    <div style="text-align:center">
+      <img src="assets/lorn_anvil/cover.svg" alt="Anvil (Lorn x Deep House) Cover Art" style="width:100%;max-width:320px;border-radius:10px;border:1px solid rgba(224,169,109,.4);box-shadow:0 8px 24px rgba(0,0,0,.6)">
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:0.65rem">
+      <span style="color:#e0a96d">1200×1200 Vector SVG</span>
+      <a href="assets/lorn_anvil/cover.svg" download="vaked-anvil-cover-art.svg" style="color:#62e6c9;text-decoration:none;border:1px solid rgba(98,230,201,.4);padding:4px 8px;border-radius:6px">DOWNLOAD SVG</a>
     </div>
   </div>
 
@@ -550,6 +661,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button id="sc-preset-peter" style="background:rgba(98,230,201,.15);border:1px solid rgba(98,230,201,.3);color:#62e6c9;padding:.2rem .5rem;border-radius:4px;cursor:pointer">@peterlodri</button>
       <button id="sc-preset-wraith" style="background:rgba(255,207,92,.15);border:1px solid rgba(255,207,92,.4);color:#ffcf5c;padding:.2rem .5rem;border-radius:4px;cursor:pointer">👾 8bit-wraith (Brother)</button>
       <button id="sc-preset-rufus" style="background:rgba(0,240,255,.2);border:1px solid rgba(0,240,255,.5);color:#00f0ff;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">🏜️ RÜFÜS - Joshua Tree</button>
+      <button id="sc-preset-lorn" style="background:rgba(255,100,50,.2);border:1px solid rgba(255,100,50,.5);color:#ff6432;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">🔨 Lorn - Anvil</button>
       <button id="sc-preset-massano" style="background:rgba(255,42,133,.2);border:1px solid rgba(255,42,133,.5);color:#ff2a85;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">⚡ Massano - The Feeling</button>
       <button id="sc-preset-artbat" style="background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5);color:#ffd700;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">☀️ ARTBAT & Benassi - Love Is Gonna Save Us</button>
       <button id="sc-preset-pink" style="background:rgba(255,117,140,.2);border:1px solid rgba(255,117,140,.5);color:#ff758c;padding:.2rem .5rem;border-radius:4px;cursor:pointer;font-weight:700">💖 P!NK - Time After Time</button>
@@ -565,6 +677,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
         <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" style="color:#ffcf5c;border-color:rgba(255,207,92,.3)">👾 8bit-wraith SC</a>
         <a href="https://soundcloud.com/peterlodri" target="_blank" rel="noopener">💬 peterlodri SC</a>
         <a href="https://soundcloud.com/rufusdusol/sets/live-from-joshua-tree" target="_blank" rel="noopener" style="color:#00f0ff;border-color:rgba(0,240,255,.4)">🏜️ RÜFÜS SC</a>
+        <a href="https://soundcloud.com/lornmusic/anvil" target="_blank" rel="noopener" style="color:#ff6432;border-color:rgba(255,100,50,.4)">🔨 Lorn SC</a>
         <a href="https://soundcloud.com/massanomusic/massano-the-feeling-2022-remaster1" target="_blank" rel="noopener" style="color:#ff2a85;border-color:rgba(255,42,133,.4)">⚡ Massano SC</a>
         <a href="https://soundcloud.com/artbatmusic" target="_blank" rel="noopener" style="color:#ffd700;border-color:rgba(255,215,0,.4)">☀️ ARTBAT SC</a>
       </div>
@@ -578,7 +691,8 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button class="sc-close" id="lyrics-close-btn">&times;</button>
     </div>
     <div class="lyrics-tabs">
-      <button class="lyrics-tab on" data-lyric="rufus">🏜️ Joshua Tree × Heureka (RÜFÜS DU SOL)</button>
+      <button class="lyrics-tab on" data-lyric="anvil">🔨 Anvil (Lorn × Deep House)</button>
+      <button class="lyrics-tab" data-lyric="rufus">🏜️ Joshua Tree × Heureka (RÜFÜS DU SOL)</button>
       <button class="lyrics-tab" data-lyric="pink">💖 Time After Time (Universal Hug)</button>
       <button class="lyrics-tab" data-lyric="artbat">☀️ Love Is Gonna Save Us (Mr Sunshine)</button>
       <button class="lyrics-tab" data-lyric="feeling">⚡ The Feeling (Massano × Ultralove)</button>
@@ -1246,6 +1360,13 @@ And we'll be here.
       { name: "VI D (Underwater Solitude)", root: 38, pad: [38, 45, 50, 54], lead: [62, 66, 69, 74] },
       { name: "III A (HEUREKA! Light)",      root: 45, pad: [45, 49, 52, 57], lead: [69, 73, 76, 81] },
       { name: "VII E (Treat You Better)",   root: 40, pad: [40, 47, 52, 56], lead: [64, 68, 71, 76] }
+    ],
+    // 12 ANVIL (LORN × DEEP HOUSE — ALMOST BUT NEVER DROPS)
+    [
+      { name: "i Dm (The Anvil Tension)",      root: 38, pad: [38, 41, 45, 50], lead: [62, 65, 69, 74] },
+      { name: "VI Bb (Suspended Gravity)",     root: 34, pad: [34, 41, 46, 50], lead: [58, 65, 70, 74] },
+      { name: "III F (Monolith Horizon)",      root: 41, pad: [41, 45, 48, 53], lead: [65, 69, 72, 77] },
+      { name: "VII C (Infinite Riser/No Drop)", root: 36, pad: [36, 43, 48, 52], lead: [60, 67, 72, 76] }
     ]
   ];
   let currentTrackIdx = 0;
@@ -1447,6 +1568,34 @@ And we'll be here.
     }
   };
 
+  /* ── LORN × DEEP HOUSE: ANVIL (Infinite Suspended Tension · Almost But Never Drops) ── */
+  const lornAnvilDeepHouseLayer = function (prog, t, s16, bar) {
+    const root = prog.root;
+    // 1. Dystopian Deep House Kick & Heavy Sub-Pressure
+    if (s16 % 4 === 0) {
+      voice("sine", root - 24, t, SIXTEENTH * 2.0, 0.46, 0.003, 0.11);
+      voice("square", root - 36, t, SIXTEENTH * 1.5, 0.15, 0.005, 0.09);
+    }
+    // 2. Metallic Anvil Industrial Percussive Tick on 4 & 12
+    if (s16 === 4 || s16 === 12) {
+      voice("triangle", root + 36, t, SIXTEENTH * 0.8, 0.14, 0.002, 0.04);
+      voice("sine", root + 48, t, SIXTEENTH * 0.5, 0.08, 0.001, 0.03);
+    }
+    // 3. Infinite Suspended Riser / Tape Saturated Lorn Reese (Tension Climbs, Never Drops)
+    const tensionFraction = ((bar % 4) * 16 + s16) / 64; // 0..1 tension swell
+    const pitchOffset = Math.sin(t * 7.2) * 0.15 + tensionFraction * 12; // slow tape pitch rise
+    if (s16 % 2 === 0) {
+      const leadNote = (prog.lead ? prog.lead[s16 % prog.lead.length] : root + 24) + pitchOffset;
+      voice("sawtooth", leadNote, t, SIXTEENTH * 2.2, 0.10 + tensionFraction * 0.08, 0.01, 0.14);
+      voice("sawtooth", leadNote - 11.95, t, SIXTEENTH * 2.2, 0.07 + tensionFraction * 0.06, 0.01, 0.14);
+    }
+    // Update live tension UI
+    const tensionPct = document.getElementById("tension-pct");
+    const tensionFill = document.getElementById("tension-fill");
+    if (tensionPct) tensionPct.textContent = ((0.55 + tensionFraction * 0.44) * 100).toFixed(1) + "%";
+    if (tensionFill) tensionFill.style.width = ((0.55 + tensionFraction * 0.44) * 100) + "%";
+  };
+
   function scheduleStep(s, t) {
     const bar = (s / 16) | 0;
     const s16 = s % 16;
@@ -1454,7 +1603,12 @@ And we'll be here.
     const prog = activeProg[bar % activeProg.length];
     const plan = barPlan();
 
-    if (currentTrackIdx === 10 || activeSeedMode === 2) {
+    if (currentTrackIdx === 11) {
+      // 🔨 Track 12: ANVIL (Lorn × Deep House — Almost But Never Drops)
+      if (s16 === 0) pad(prog.pad, t);
+      lornAnvilDeepHouseLayer(prog, t, s16, bar);
+      if (plan.melAt[s16]) melody(t, SIXTEENTH * 2);
+    } else if (currentTrackIdx === 10 || activeSeedMode === 2) {
       // 🏜️ Track 11: RÜFÜS DU SOL (Joshua Tree × HEUREKA)
       if (s16 === 0) pad(prog.pad, t);
       rufusJoshuaTreeLayer(prog, t, s16, bar);
@@ -1564,7 +1718,8 @@ And we'll be here.
           "08 THE FEELING (MASSANO × ULTRALOVE)",
           "09 LOVE IS GONNA SAVE US (ARTBAT × BENASSI)",
           "10 TIME AFTER TIME (P!NK × UNIVERSAL LOVE)",
-          "11 RÜFÜS DU SOL (JOSHUA TREE × HEUREKA)"
+          "11 RÜFÜS DU SOL (JOSHUA TREE × HEUREKA)",
+          "12 ANVIL (LORN × DEEP HOUSE — NO DROP)"
         ];
         if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
       });
@@ -1791,6 +1946,8 @@ And we'll be here.
   window.engine.setVolume = function (v) {
     if (master) master.gain.setTargetAtTime(v, ctx.currentTime, 0.05);
   };
+  window.engine.getBuffers = function() { return { freqData, timeData }; };
+  window.engine.__progressions = EP_PROGRESSIONS;
 })();
 </script>
 
@@ -1903,11 +2060,191 @@ function boot() {
     });
   }
 
+  // Live Waveform Canvas Renderer
+  function drawWaveform() {
+    const canvas = document.getElementById("waveform-canvas");
+    if (!canvas || !window.engine || typeof window.engine.getBuffers !== "function") return;
+    const ctx2d = canvas.getContext("2d");
+    if (!ctx2d) return;
+    const bufs = window.engine.getBuffers();
+    const timeArr = bufs.timeData;
+    const freqArr = bufs.freqData;
+    const w = canvas.width, h = canvas.height;
+    ctx2d.clearRect(0, 0, w, h);
+
+    // subtle center grid line
+    ctx2d.strokeStyle = "rgba(0, 240, 255, 0.15)";
+    ctx2d.lineWidth = 1;
+    ctx2d.beginPath();
+    ctx2d.moveTo(0, h / 2);
+    ctx2d.lineTo(w, h / 2);
+    ctx2d.stroke();
+
+    // frequency spectrum bars
+    if (freqArr) {
+      const barCount = 32;
+      const barWidth = (w / barCount) - 2;
+      for (let b = 0; b < barCount; b++) {
+        const val = freqArr[b * 4] / 255.0;
+        const barH = val * (h * 0.45);
+        ctx2d.fillStyle = "rgba(255, 215, 0, 0.45)";
+        ctx2d.fillRect(b * (barWidth + 2), h - barH, barWidth, barH);
+      }
+    }
+
+    // time-domain oscilloscope trace
+    if (timeArr) {
+      ctx2d.lineWidth = 2;
+      ctx2d.strokeStyle = "#00f0ff";
+      ctx2d.shadowColor = "#00f0ff";
+      ctx2d.shadowBlur = 6;
+      ctx2d.beginPath();
+      const sliceWidth = w / timeArr.length;
+      let x = 0;
+      for (let i = 0; i < timeArr.length; i++) {
+        const v = timeArr[i] / 128.0;
+        const y = (v * h) / 2;
+        if (i === 0) ctx2d.moveTo(x, y);
+        else ctx2d.lineTo(x, y);
+        x += sliceWidth;
+      }
+      ctx2d.stroke();
+      ctx2d.shadowBlur = 0;
+    }
+  }
+
+  // 24-bit / 16-bit Master Lossless WAV Exporter Engine
+  function exportWavMaster() {
+    const statusEl = document.getElementById("wav-status");
+    if (statusEl) statusEl.textContent = "Rendering 16 bars master WAV...";
+    const sampleRate = 44100;
+    const BPM = 76;
+    const duration = 16 * 4 * (60 / BPM); // 16 bars
+    const offCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, Math.round(sampleRate * duration), sampleRate);
+    
+    const offMaster = offCtx.createGain();
+    offMaster.gain.value = 0.85;
+    offMaster.connect(offCtx.destination);
+    
+    function midiFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+    for (let b = 0; b < 16; b++) {
+      const activeProg = window.engine.__progressions ? (window.engine.__progressions[11] || window.engine.__progressions[0]) : [{ root: 38, pad: [38,41,45,50], lead: [62,65,69,74] }];
+      const prog = activeProg[b % activeProg.length];
+      const t = b * 4 * (60 / BPM);
+      for (let s16 = 0; s16 < 16; s16++) {
+        const stepT = t + s16 * (60 / BPM / 4);
+        if (s16 === 0) {
+          for (let p of prog.pad) {
+            const osc = offCtx.createOscillator();
+            const g = offCtx.createGain();
+            osc.type = "triangle";
+            osc.frequency.value = midiFreq(p);
+            g.gain.setValueAtTime(0.0001, stepT);
+            g.gain.linearRampToValueAtTime(0.06, stepT + 0.8);
+            g.gain.linearRampToValueAtTime(0.0001, stepT + 4 * (60 / BPM));
+            osc.connect(g); g.connect(offMaster);
+            osc.start(stepT); osc.stop(stepT + 4 * (60 / BPM) + 0.1);
+          }
+        }
+        if (s16 % 4 === 0) {
+          const osc = offCtx.createOscillator();
+          const g = offCtx.createGain();
+          osc.type = "sine";
+          osc.frequency.value = midiFreq(prog.root - 24);
+          g.gain.setValueAtTime(0.0001, stepT);
+          g.gain.linearRampToValueAtTime(0.45, stepT + 0.005);
+          g.gain.linearRampToValueAtTime(0.0001, stepT + 0.18);
+          osc.connect(g); g.connect(offMaster);
+          osc.start(stepT); osc.stop(stepT + 0.2);
+        }
+        if (prog.lead && s16 % 2 === 0) {
+          const osc = offCtx.createOscillator();
+          const g = offCtx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.value = midiFreq(prog.lead[s16 % prog.lead.length]);
+          g.gain.setValueAtTime(0.0001, stepT);
+          g.gain.linearRampToValueAtTime(0.12, stepT + 0.01);
+          g.gain.linearRampToValueAtTime(0.0001, stepT + 0.15);
+          osc.connect(g); g.connect(offMaster);
+          osc.start(stepT); osc.stop(stepT + 0.18);
+        }
+      }
+    }
+    
+    offCtx.startRendering().then((renderedBuffer) => {
+      const numOfChan = renderedBuffer.numberOfChannels,
+        length = renderedBuffer.length * numOfChan * 2 + 44,
+        buffer = new ArrayBuffer(length),
+        view = new DataView(buffer),
+        channels = [];
+      let offset = 0, pos = 0;
+      function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+      function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+      setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+      setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+      setUint32(sampleRate); setUint32(sampleRate * 2 * numOfChan);
+      setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164);
+      setUint32(length - pos - 4);
+      for (let i = 0; i < numOfChan; i++) channels.push(renderedBuffer.getChannelData(i));
+      while (pos < length) {
+        for (let i = 0; i < numOfChan; i++) {
+          let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+          sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+          view.setInt16(pos, sample, true);
+          pos += 2;
+        }
+        offset++;
+      }
+      const wavBlob = new Blob([buffer], { type: "audio/wav" });
+      const url = URL.createObjectURL(wavBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `vaked-anvil-lorn-almost-never-drops-432hz.wav`;
+      a.click();
+      if (statusEl) statusEl.textContent = "WAV Master Downloaded! ✨";
+      setTimeout(() => { if (statusEl) statusEl.textContent = ""; }, 4000);
+    }).catch((err) => {
+      if (statusEl) statusEl.textContent = "Render notice: " + err.message;
+    });
+  }
+
+  // Drawer Open/Close Listeners
+  const bindDrawer = (toggleId, panelId, closeId) => {
+    const btn = document.getElementById(toggleId);
+    const panel = document.getElementById(panelId);
+    const close = document.getElementById(closeId);
+    if (btn && panel) {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        panel.classList.toggle("open");
+        btn.classList.toggle("on");
+      });
+    }
+    if (close && panel) {
+      close.addEventListener("click", (e) => {
+        e.stopPropagation();
+        panel.classList.remove("open");
+        if (btn) btn.classList.remove("on");
+      });
+    }
+  };
+  bindDrawer("waveform-toggle-btn", "waveform-panel", "waveform-close-btn");
+  bindDrawer("layers-toggle-btn", "layers-panel", "layers-close-btn");
+  bindDrawer("cover-toggle-btn", "cover-panel", "cover-close-btn");
+
+  const wavBtn = document.getElementById("wav-export-btn");
+  if (wavBtn) wavBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    exportWavMaster();
+  });
+
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     if (engine.render) engine.render(dt, now / 1000);
+    try { drawWaveform(); } catch (e) {}
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -1990,6 +2327,7 @@ else boot();
   const pPeter = document.getElementById("sc-preset-peter");
   const pWraith = document.getElementById("sc-preset-wraith");
   const pRufus = document.getElementById("sc-preset-rufus");
+  const pLorn = document.getElementById("sc-preset-lorn");
   const pMassano = document.getElementById("sc-preset-massano");
   const pArtbat = document.getElementById("sc-preset-artbat");
   const pPink = document.getElementById("sc-preset-pink");
@@ -2010,6 +2348,12 @@ else boot();
     pRufus.addEventListener("click", () => {
       if (searchInput) searchInput.value = "rufus du sol live from joshua tree";
       loadUrl("https://soundcloud.com/rufusdusol/sets/live-from-joshua-tree");
+    });
+  }
+  if (pLorn) {
+    pLorn.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "lorn anvil";
+      loadUrl("https://soundcloud.com/lornmusic/anvil");
     });
   }
   if (pMassano) {
@@ -2038,6 +2382,8 @@ else boot();
       loadUrl("https://soundcloud.com/peterlodri");
     } else if (q === "8bit-wraith" || q === "@8bit-wraith") {
       loadUrl("https://soundcloud.com/8bit-wraith");
+    } else if (q.includes("lorn") || q.includes("anvil")) {
+      loadUrl("https://soundcloud.com/lornmusic/anvil");
     } else if (q.includes("rufus") || q.includes("joshua tree") || q.includes("innerbloom")) {
       loadUrl("https://soundcloud.com/rufusdusol/sets/live-from-joshua-tree");
     } else if (q.includes("massano")) {
@@ -2076,6 +2422,27 @@ else boot();
   const lyricsTabs = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".lyrics-tab") : [];
 
   const LYRICS_DATA = {
+    anvil: `[ANVIL — LORN × DEEP HOUSE (Almost But Never Drops)]
+[42 + 1 + <3 Layers · Infinite Suspended Tension · 432Hz]
+
+Heavy metal monolith under a fractured sky,
+The pressure builds, the frequency climbs high.
+Analog distortion on the edge of the void,
+A thousand rising waves, perfectly deployed.
+
+You wait for the drop to break through the floor,
+You lean into the abyss, craving something more.
+The riser keeps climbing, the tape begins to tear,
+Suspended in the silence, weightless in the air.
+
+It almost drops...
+The pulse quickens, the breath holds tight.
+It almost drops...
+And then dissolves into eternal light.
+
+No release. Only infinite suspension.
+42 + 1 + <3 layers of pure tension.
+- P & Lorn`,
     rufus: `[Live from Joshua Tree — RÜFÜS DU SOL × Archimedes Heureka]
 [Desert Sunrise Diatonic Symphony · 432Hz Bath of Pure Light]
 
