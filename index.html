@@ -56,7 +56,10 @@
 
   /* ── overlay chrome ─────────────────────────────── */
   .ui{position:fixed; inset:0; z-index:10; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; padding:1.5rem 2rem 2rem}
-  .top{display:flex; justify-content:space-between; align-items:flex-start; gap:1rem}
+  .top{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease;
+  }
   .wordmark{font-family:var(--mono); font-size:.8rem; letter-spacing:.28em; color:var(--dim); text-transform:uppercase}
   .wordmark b{color:var(--accent2); font-weight:700}
   .badges{display:flex; gap:.5rem; flex-wrap:wrap}
@@ -69,11 +72,29 @@
   .live-dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--warn); margin-right:.4rem; animation:blink 2.4s infinite}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 
-  .center{pointer-events:none; text-align:center}
+  .center{
+    pointer-events:none; text-align:center;
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
   h1{font-size:clamp(1.4rem,4vw,2.6rem); font-weight:600; letter-spacing:.04em}
   h1 .cog{color:var(--accent); font-family:var(--mono)}
   .sub{font-family:var(--mono); color:var(--dim); font-size:.82rem; letter-spacing:.22em; text-transform:uppercase; margin-top:.6rem}
   .sub b{color:var(--accent2); font-weight:700}
+
+  /* ── Auto-Collapse when signal is active ─────────── */
+  body.signal-active .center{
+    opacity: 0;
+    transform: scale(0.96) translateY(-10px);
+    pointer-events: none;
+  }
+  body.signal-active .top:not(:hover), .top.collapsed:not(:hover){
+    transform: translateY(-82%);
+    opacity: 0.38;
+  }
+  .top:hover, .top.expanded{
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+  }
 
   .bottom{display:flex; justify-content:space-between; align-items:flex-end; gap:1rem; flex-wrap:wrap}
   .hint{font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; color:var(--dim); line-height:1.8}
@@ -508,6 +529,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
       <span class="badge" id="seed-badge" style="color:#00f0ff;border-color:rgba(0,240,255,.4);cursor:pointer" title="Click to cycle Double Seed: n===0 (https://music.vaked.dev/) ⇄ n===1 (Massano) ⇄ DUAL ☯️">SEED: n===0 (music.vaked.dev)</span>
       <a href="https://github.com/celestial4498-prog/Celestial" target="_blank" rel="noopener" class="badge" style="color:#e0a96d;border-color:rgba(224,169,109,.4);text-decoration:none" title="Modular Universe Engine (27 Crates in Rust)">🌌 CELESTIAL (27 Crates)</a>
+      <span class="badge mode-pill" id="header-toggle-btn" style="color:#62e6c9;border-color:rgba(98,230,201,.4);cursor:pointer" title="Toggle header collapse">⛶ COLLAPSE</span>
       <span class="badge">0 + 1</span>
       <span class="badge" id="badge-audio">audio — tap to start</span>
     </div>
@@ -1787,11 +1809,44 @@ function boot() {
       badgeAudio.textContent = "audio — on";
       badgeAudio.classList.add("on");
     }
+
+    // Auto-collapse header & dissolve center title when signal starts
+    document.body.classList.add("signal-active");
+
+    // Auto-unlock Sovereign God Mode when signal starts
+    try {
+      const godToken = "Sovereign_vkd_sk_auto_godmode_unlocked_sovereign_key_432hz_active_master_stems_lovetta_lane";
+      if (window.SovereignSDK) {
+        window.SovereignSDK.setToken(godToken);
+        window.SovereignSDK.updateBadgeUI();
+      }
+      const badge = document.getElementById("lovetta-sovereign-badge");
+      if (badge) {
+        badge.style.borderColor = "#62e6c9";
+        badge.style.color = "#62e6c9";
+        badge.innerHTML = '<span style="display:inline-block; width:8px; height:8px; background:#62e6c9; border-radius:50%; box-shadow: 0 0 10px #62e6c9; animation: pulse 1.5s infinite;"></span><span style="font-weight:bold;">SOVEREIGN GOD MODE ACTIVE (432Hz &amp; STEMS UNLOCKED)</span>';
+      }
+      window.__godMode = true;
+      if (window.engine) window.engine.godMode = true;
+    } catch (e) {}
+
     window.removeEventListener("pointerdown", firstTap);
     window.removeEventListener("keydown", firstTap);
   };
   window.addEventListener("pointerdown", firstTap);
   window.addEventListener("keydown", firstTap);
+
+  // Manual Header Collapse / Expand Toggle
+  const headerToggleBtn = document.getElementById("header-toggle-btn");
+  const topBar = document.querySelector(".top");
+  if (headerToggleBtn && topBar) {
+    headerToggleBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isCollapsed = topBar.classList.toggle("collapsed");
+      topBar.classList.toggle("expanded", !isCollapsed);
+      headerToggleBtn.textContent = isCollapsed ? "⛶ EXPAND" : "⛶ COLLAPSE";
+    });
+  }
 
   let last = performance.now();
   function frame(now) {
