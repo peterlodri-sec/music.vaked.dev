@@ -1,3 +1,9 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EQUATION OF STATE — THE SOVEREIGN CONSTELLATION
+# U_constellation = ( igcup_{k=1}^{14} Node_k ) \cup { \heartsuit_music, \heartsuit_math, \heartsuit_vicky } + 1_peter
+# {<3, <3, <3} + 1 · 0 + 1 · Fine touch from within · Constellation Equilibrium
+# ═══════════════════════════════════════════════════════════════════════════
+
 #!/usr/bin/env python3
 """backyard_ultra.py — MUSIC.VAKED.DEV · 4 rounds + real e2e publish
 
