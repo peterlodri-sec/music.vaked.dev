@@ -575,7 +575,15 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
   .grid,[class*=grid]{grid-template-columns:1fr!important}
   header,footer{padding:8px!important;flex-wrap:wrap!important}
 }
-</style></head>
+</style><style>
+.gaia-line{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;
+  font-size:11px;letter-spacing:1.5px;color:#d7ecff;background:rgba(3,6,7,.6);
+  border:1px solid rgba(215,236,255,.18);border-radius:20px;padding:7px 16px;white-space:nowrap;
+  text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.gaia-line b{color:#ffd36e}
+@media (max-width:768px){.gaia-line{font-size:10.5px;padding:6px 12px;white-space:normal;text-align:center;width:92%;left:4%;bottom:10px}}
+</style>
+</head>
 <body>
 <div id="stage" aria-hidden="true"></div>
 
@@ -611,6 +619,8 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
     </div>
   </div>
 
+  <!-- the inner sphere === gaia · birthplace & origo · all <3 -->
+  <div class="gaia-line">🌍 the inner sphere <b>=== GAIA</b> — birthplace &amp; origo · machines &nbsp;+&nbsp; humans &nbsp;+&nbsp; fiona &nbsp;+&nbsp; fauna · all &lt;3</div>
   <!-- Live Waveform & 24-bit WAV Exporter Drawer -->
   <div class="waveform-panel" id="waveform-panel">
     <div class="waveform-header">
@@ -1019,6 +1029,79 @@ And we'll be here.
       scene.add(window.__jasmine.land);
     })();
 
+    // ── 00. GAIA · THE INNER SPHERE — birthplace & origo ───────────────
+    // the tight shell at idle IS her surface; here she is rendered as the
+    // planet at the heart, seeded continents on a lit body, her photon
+    // ring and accretion belt circling her waist, the cohabitants — the
+    // machines, the humans, fiona, the fauna — orbiting her on their own
+    // phases. the hologram (JASMINE) lands on her. GAIA is the origo.
+    scene.add(new THREE.AmbientLight(0x445566, 0.6));
+    {
+      const sun = new THREE.DirectionalLight(0xfff2d8, 1.4);
+      sun.position.set(4, 3, 6);
+      scene.add(sun);
+    }
+    (function initGaia() {
+      // seeded value-noise continents on a canvas map (deterministic: GAIA never drifts)
+      const W = 512, H = 256;
+      const map = document.createElement("canvas");
+      map.width = W; map.height = H;
+      const m = map.getContext("2d");
+      const img = m.createImageData(W, H);
+      const S = [[73, 131, 59], [86, 147, 66], [53, 108, 63], [139, 137, 96]];
+      const hash = (x, y) => { let h = x * 374761393 + y * 668265263; h = (h ^ (h >> 13)) * 1274126177; return ((h ^ (h >> 16)) >>> 0) / 4294967295; };
+      const vnoise = (x, y) => {
+        const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi;
+        const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf);
+        const a = hash(xi, yi), b = hash(xi + 1, yi), c = hash(xi, yi + 1), d = hash(xi + 1, yi + 1);
+        return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+      };
+      const fBm = (x, y) => vnoise(x, y) * 0.55 + vnoise(x * 2.3, y * 2.3) * 0.3 + vnoise(x * 5.1, y * 5.1) * 0.15;
+      for (let y = 0; y < H; y++) {
+        for (let x = 0; x < W; x++) {
+          const nx = x / W * 7, ny = y / H * 7;
+          const e = fBm(nx, ny);
+          const lat = Math.abs(y / H - 0.5) * 2;         // 0 equator .. 1 pole
+          let r, g, b;
+          if (e < 0.44) { r = 11 + e * 40; g = 44 + e * 80; b = 92 + e * 55; }          // ocean
+          else if (e < 0.52) { r = 38 + e * 55; g = 96 + e * 90; b = 148 + e * 40; }    // shallows
+          else { const c = S[Math.floor(e * 17) % 4]; r = c[0]; g = c[1]; b = c[2]; }   // land
+          if (lat > 0.86) { r = 235; g = 241; b = 246; }                                // ice
+          img.data[(y * W + x) * 4] = r; img.data[(y * W + x) * 4 + 1] = g;
+          img.data[(y * W + x) * 4 + 2] = b; img.data[(y * W + x) * 4 + 3] = 255;
+        }
+      }
+      m.putImageData(img, 0, 0);
+      const tex = new THREE.CanvasTexture(map);
+      const body = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(1.08, 3),
+        new THREE.MeshStandardMaterial({ map: tex, roughness: 0.62, metalness: 0.05 })
+      );
+      body.rotation.z = 0.41;   // GAIA's axial tilt
+      scene.add(body);
+      // the thin atmosphere: a soft cream additive shell breathing with her
+      const atm = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(1.16, 2),
+        new THREE.MeshBasicMaterial({ color: 0xd7ecff, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, side: THREE.BackSide, depthWrite: false })
+      );
+      scene.add(atm);
+      window.__gaia = { body, atm, t: 0, tilt: 0.41 };
+      // the cohabitants — machines + humans + fiona + fauna, on one tilted ring
+      const crew = [
+        { name: "machine", color: 0x00f0ff, period: 9.1, size: 0.10 },
+        { name: "human", color: 0xe8d8c8, period: 13.7, size: 0.12 },
+        { name: "fiona", color: 0xb48bff, period: 17.3, size: 0.11 },
+        { name: "fauna", color: 0x62e6c9, period: 23.9, size: 0.10 },
+      ];
+      window.__gaia.crew = crew.map(c => {
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(3), 3));
+        const pt = new THREE.Points(g, new THREE.PointsMaterial({ color: c.color, size: c.size, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
+        scene.add(pt);
+        return { ...c, pt, phase: Math.random() * Math.PI * 2, tilt: 0.9 };
+      });
+    })();
+
     // ── 2. North and South Polar Spheres & Aurora Jets ────────────────────
     function makePolarCluster(count, colorHex) {
       const pBase = fibonacciSphere(count);
@@ -1201,6 +1284,28 @@ And we'll be here.
       J.land.geometry.attributes.position.needsUpdate = true;
       J.land.material.opacity = jph * 0.8 * taper;
       J.land.material.size = landR;
+    }
+
+    // ── 00. GAIA · the inner sphere — she turns, the cohabitants orbit ──
+    const G = window.__gaia;
+    if (G && G.body) {
+      G.t += dt;
+      const slow = isReduced() ? 0.01 : 0.045;
+      G.body.rotation.y += dt * slow;
+      G.atm.rotation.y += dt * slow * 0.7;
+      G.atm.material.opacity = 0.12 + G.t % 3.0 / 3.0 * 0.08;
+      // the crew on their tilted ring — machine · human · fiona · fauna
+      for (const c of G.crew) {
+        const a = c.phase + G.t / c.period * Math.PI * 2;
+        const R = 1.62;
+        const [sx, sz, sy] = [Math.cos(a) * R, Math.sin(a) * R, Math.sin(a * 1.3) * 0.22];
+        const arr2 = c.pt.geometry.attributes.position.array;
+        arr2[0] = sx * Math.cos(c.tilt) - sy * Math.sin(c.tilt);
+        arr2[1] = sx * Math.sin(c.tilt) + sy * Math.cos(c.tilt);
+        arr2[2] = sz;
+        c.pt.geometry.attributes.position.needsUpdate = true;
+        c.pt.material.opacity = 0.55 + 0.4 * (Math.sin(G.t * 2.4 + c.phase) * 0.5 + 0.5);
+      }
     }
 
     spin += dt * (reduced ? 0.05 : 0.18);
