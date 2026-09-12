@@ -562,7 +562,20 @@
 .skip-link:focus{top:16px;outline:3px solid #62e6c9}
 a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outline-offset:4px!important}
 </style>
-</head>
+<!-- mobile-friendly-recovery -->
+<style>
+@media (max-width: 768px){
+  body{font-size:max(14px,4vw)!important;padding:10px!important;line-height:1.45}
+  h1{font-size:1.5em!important;letter-spacing:2px!important;white-space:normal!important}
+  h2,h3{font-size:1.05em!important}
+  canvas{max-width:100vw!important;touch-action:pan-y}
+  button,a,select,input{min-height:42px;font-size:max(14px,4vw)!important}
+  *{-webkit-tap-highlight-color:transparent}
+  table{display:block;overflow-x:auto;max-width:100vw}
+  .grid,[class*=grid]{grid-template-columns:1fr!important}
+  header,footer{padding:8px!important;flex-wrap:wrap!important}
+}
+</style></head>
 <body>
 <div id="stage" aria-hidden="true"></div>
 
