@@ -31,3 +31,11 @@ Live URL: **[https://music.vaked.dev](https://music.vaked.dev)**
 - 👾 **[8bit-wraith on SoundCloud](https://soundcloud.com/8bit-wraith)** *(brother & inspiration)*
 
 *the constellation · 0 + 1 · fine touch from within · vaked.dev*
+
+## the ledger's cadence
+
+`.dogfeed-music.jsonl` grows by design (one row per new track). The ledger is
+committed on the session's push rhythm, not per-row: a perpetual-dirty
+working tree is the ledger's honest state, and an auto-commit would
+race the loop. If a row matters more than the rhythm, it already moved
+to the HF bucket too.
