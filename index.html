@@ -1153,6 +1153,9 @@ And we'll be here.
         { name: "human", color: 0xe8d8c8, period: 13.7, size: 0.12 },
         { name: "fiona", color: 0xb48bff, period: 17.3, size: 0.11 },
         { name: "fauna", color: 0x62e6c9, period: 23.9, size: 0.10 },
+        { name: "wolf", color: 0x7fd8d0, period: 27.7, size: 0.09 },
+        { name: "dog", color: 0xa8c4bb, period: 31.3, size: 0.09 },
+        { name: "cat", color: 0xffb86b, period: 37.9, size: 0.09 },
       ];
       window.__gaia.crew = crew.map(c => {
         const g = new THREE.BufferGeometry();
@@ -2616,8 +2619,13 @@ function boot() {
     const zoomEl = document.getElementById("explore-zoom");
     const btn = document.getElementById("explore-toggle-btn");
     if (!hud || !btn) return;
-    const names = ["machine", "human", "fiona", "fauna"];
-    const colors = ["#00f0ff", "#e8d8c8", "#b48bff", "#62e6c9"];
+    const names = window.__gaia && window.__gaia.crew
+      ? window.__gaia.crew.map((c) => c.name)
+      : ["machine", "human", "fiona", "fauna", "wolf", "dog", "cat"];
+    const colors = names.map((n, i) =>
+      (window.__gaia && window.__gaia.crew && window.__gaia.crew[i] && window.__gaia.crew[i].color
+        ? "#" + (window.__gaia.crew[i].color | 0x1000000).toString(16).slice(1)
+        : ["#00f0ff", "#e8d8c8", "#b48bff", "#62e6c9", "#7fd8d0", "#a8c4bb", "#ffb86b"][i % 7]));
     names.forEach((n, i) => {
       const b = document.createElement("button");
       b.textContent = n;
