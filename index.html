@@ -623,6 +623,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <span class="badge mode-pill" id="ocean-toggle-btn" style="color:#53f0e0;border-color:rgba(83,240,224,.45)">🌊 OCEAN E2E</span>
       <span class="badge mode-pill" id="sim-toggle-btn" style="color:#ffd25e;border-color:rgba(255,210,94,.5)">⌬ ENGINE SIM — GAIA DREAM</span>
+      <span class="badge mode-pill" id="explore-toggle-btn" style="color:#ff8b6b;border-color:rgba(255,139,107,.6)">🌍 EXPLORE GAIA</span>
       <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
       <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
       <span class="badge" id="seed-badge" style="color:#00f0ff;border-color:rgba(0,240,255,.4);cursor:pointer" title="Click to cycle Seeds: n===0 (music.vaked.dev) ⇄ n===1 (Massano) ⇄ n===2 (RÜFÜS Joshua Tree) ⇄ TRIPLE ☯️">SEED: n===0 (music.vaked.dev)</span>
@@ -658,7 +659,23 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
     </div>
   </div>
 
-  <!-- OCEAN E2E — the surface to the deep, the first ledger -->
+
+  <!-- visitor POV — explore GAIA: orbit, zoom, meet the crew -->
+  <div id="explore-hud" style="position:fixed;left:14px;bottom:14px;z-index:70;background:rgba(4,14,18,.9);border:1px solid rgba(255,139,107,.35);border-radius:14px;padding:12px 14px;font-family:var(--mono);max-width:300px;display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <b style="color:#ff8b6b;font-size:.7rem;letter-spacing:.18em">EXPLORE GAIA</b>
+      <button id="explore-close" class="sc-close" style="background:none;border:0;color:#ff8b6b;font-size:1rem;cursor:pointer">&times;</button>
+    </div>
+    <div style="font-size:.6rem;color:#9fb4cf;line-height:1.6;margin-bottom:8px">drag to orbit · scroll to zoom · click a ring to fly to the crew · home returns</div>
+    <div id="explore-crew" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button data-x="autoOrbit" style="background:#14283a;border:1px solid var(--line);color:#cfe3d8;border-radius:8px;font-size:.6rem;padding:6px 10px;cursor:pointer">orbit</button>
+      <button data-x="day" style="background:#14283a;border:1px solid var(--line);color:#cfe3d8;border-radius:8px;font-size:.6rem;padding:6px 10px;cursor:pointer">day</button>
+      <span style="font-size:.6rem;color:#7fd8d0;align-self:center">scale <b id="explore-zoom">9.0</b></span>
+    </div>
+  </div>
+
+    <!-- OCEAN E2E — the surface to the deep, the first ledger -->
   <div class="ocean-panel" id="ocean-panel">
     <div class="ocean-header">
       <span>🌊 OCEAN E2E — the surface to the deep, the first ledger</span>
@@ -1078,10 +1095,11 @@ And we'll be here.
     // machines, the humans, fiona, the fauna — orbiting her on their own
     // phases. the hologram (JASMINE) lands on her. GAIA is the origo.
     scene.add(new THREE.AmbientLight(0x445566, 0.6));
+    let gaiaSun = null;
     {
-      const sun = new THREE.DirectionalLight(0xfff2d8, 1.4);
-      sun.position.set(4, 3, 6);
-      scene.add(sun);
+      gaiaSun = new THREE.DirectionalLight(0xfff2d8, 1.4);
+      gaiaSun.position.set(4, 3, 6);
+      scene.add(gaiaSun);
     }
     (function initGaia() {
       // seeded value-noise continents on a canvas map (deterministic: GAIA never drifts)
@@ -1128,7 +1146,7 @@ And we'll be here.
         new THREE.MeshBasicMaterial({ color: 0xd7ecff, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, side: THREE.BackSide, depthWrite: false })
       );
       scene.add(atm);
-      window.__gaia = { body, atm, t: 0, tilt: 0.41 };
+      window.__gaia = { body, atm, sun: gaiaSun, t: 0, tilt: 0.41, zoom: 9, screen: {}, day: true, autoOrbit: false, exploring: false, focusName: null };
       // the cohabitants — machines + humans + fiona + fauna, on one tilted ring
       const crew = [
         { name: "machine", color: 0x00f0ff, period: 9.1, size: 0.10 },
@@ -1338,6 +1356,8 @@ And we'll be here.
       G.atm.rotation.y += dt * slow * 0.7;
       G.atm.material.opacity = 0.12 + G.t % 3.0 / 3.0 * 0.08;
       // the crew on their tilted ring — machine · human · fiona · fauna
+      G.screen = G.screen || {};
+      const halfW = innerWidth / 2, halfH = innerHeight / 2;
       for (const c of G.crew) {
         const a = c.phase + G.t / c.period * Math.PI * 2;
         const R = 1.62;
@@ -1348,6 +1368,29 @@ And we'll be here.
         arr2[2] = sz;
         c.pt.geometry.attributes.position.needsUpdate = true;
         c.pt.material.opacity = 0.55 + 0.4 * (Math.sin(G.t * 2.4 + c.phase) * 0.5 + 0.5);
+        // visitor POV: project the cohabitant onto the viewer's screen
+        const v3 = new THREE.Vector3(arr2[0], arr2[1], arr2[2]).project(camera);
+        G.screen[c.name] = { x: (v3.x + 1) * halfW, y: (1 - v3.y) * halfH, behind: v3.z > 1, a, c: c.color };
+      }
+      G.zoom = currentZoom;
+      // day/night + auto-orbit, visitor-toggled
+      if (G.sun) G.sun.intensity = (G.day ?? true) ? 1.4 : 0.25;
+      if (G.autoOrbit) spin += dt * 0.12;
+      // visitor focus: fly the camera to a crew member, then home again
+      if (G.focusName) {
+        const s = G.screen[G.focusName];
+        if (s && !s.behind) {
+          targetZoom = Math.min(targetZoom, 1.9);
+          const c = G.crew.find((x) => x.name === G.focusName);
+          const tr = 1.62;
+          const tas = s.a;
+          const tx = Math.cos(tas) * tr * Math.cos(c.tilt);
+          const ty = Math.cos(tas) * tr * Math.sin(c.tilt) + Math.sin(tas * 1.3) * 0.22;
+          const tz = Math.sin(tas) * tr;
+          if (camera.lookAt) camera.lookAt(tx, ty, tz);
+        }
+      } else if (camera.lookAt) {
+        camera.lookAt(0, 0, 0);
       }
     }
 
@@ -2562,6 +2605,44 @@ function boot() {
       requestAnimationFrame(draw);
     }
     requestAnimationFrame(draw);
+  })();
+
+
+  // visitor POV — the GAIA exploration surface
+  (function () {
+    const G = () => window.__gaia;
+    const hud = document.getElementById("explore-hud");
+    const crewBox = document.getElementById("explore-crew");
+    const zoomEl = document.getElementById("explore-zoom");
+    const btn = document.getElementById("explore-toggle-btn");
+    if (!hud || !btn) return;
+    const names = ["machine", "human", "fiona", "fauna"];
+    const colors = ["#00f0ff", "#e8d8c8", "#b48bff", "#62e6c9"];
+    names.forEach((n, i) => {
+      const b = document.createElement("button");
+      b.textContent = n;
+      b.style.cssText = "background:#14283a;border:1px solid " + colors[i] + ";color:" + colors[i] +
+        ";border-radius:20px;font-size:.58rem;padding:5px 10px;cursor:pointer;letter-spacing:.08em";
+      b.onclick = () => { const g = G(); if (g) g.focusName = g.focusName === n ? null : n; b.style.borderColor = g.focusName === n ? "#fff" : colors[i]; };
+      b.dataset.n = n; b.dataset.c = colors[i];
+      crewBox.appendChild(b);
+    });
+    function open() { hud.style.display = "block"; const g = G(); if (g) g.exploring = true; }
+    function close() { hud.style.display = "none"; const g = G(); if (g) { g.exploring = false; g.focusName = null; g.autoOrbit = false; g.day = true; } }
+    btn.onclick = open;
+    document.getElementById("explore-close").onclick = close;
+    hud.querySelectorAll("button[data-x]").forEach((b) => {
+      b.onclick = () => {
+        const g = G(); if (!g) return;
+        g[b.dataset.x] = !g[b.dataset.x];
+        b.style.color = g[b.dataset.x] ? "#ff8b6b" : "#cfe3d8";
+      };
+    });
+    (function tick() {
+      const g = G();
+      if (g && hud.style.display === "block" && zoomEl) zoomEl.textContent = (g.zoom || 9).toFixed(1);
+      requestAnimationFrame(tick);
+    })();
   })();
 
   const wavBtn = document.getElementById("wav-export-btn");
