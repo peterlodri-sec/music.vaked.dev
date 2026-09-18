@@ -622,6 +622,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" id="lyrics-toggle-btn" style="color:#ffcf5c;border-color:rgba(255,207,92,.4)">📜 SOUL & POETRY LAYER</span>
       <span class="badge mode-pill" id="sc-toggle-btn" style="color:#ff5500;border-color:rgba(255,85,0,.4)">🎵 SOUNDCLOUD PLAYER & SEARCH</span>
       <span class="badge mode-pill" id="ocean-toggle-btn" style="color:#53f0e0;border-color:rgba(83,240,224,.45)">🌊 OCEAN E2E</span>
+      <span class="badge mode-pill" id="sim-toggle-btn" style="color:#ffd25e;border-color:rgba(255,210,94,.5)">⌬ ENGINE SIM — GAIA DREAM</span>
       <a href="https://soundcloud.com/8bit-wraith" target="_blank" rel="noopener" class="badge" style="color:#ffcf5c;border-color:rgba(255,207,92,.4);text-decoration:none">👾 8bit-wraith (brother & inspiration)</a>
       <span class="badge on" id="drone-badge">DRONE SYNTH 432Hz</span>
       <span class="badge" id="seed-badge" style="color:#00f0ff;border-color:rgba(0,240,255,.4);cursor:pointer" title="Click to cycle Seeds: n===0 (music.vaked.dev) ⇄ n===1 (Massano) ⇄ n===2 (RÜFÜS Joshua Tree) ⇄ TRIPLE ☯️">SEED: n===0 (music.vaked.dev)</span>
@@ -668,6 +669,21 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       surface → sun-shafts → attenuation (the NOAA light-and-color curves) → the humpback's call rings
       → the mem8 quad pulsing at the seabed. the ocean is the first ledger: it keeps every wave.
     </div>
+  </div>
+
+  <!-- ENGINE SIM — the 1.58-bit dream, byte-equal, golden-asserted -->
+  <div class="ocean-panel" id="sim-panel">
+    <div class="ocean-header">
+      <span>⌬ ENGINE DREAM — GAIA full-sim (the 1.58-bit lane in the browser)</span>
+      <button class="sc-close" id="sim-close-btn">&times;</button>
+    </div>
+    <canvas id="sim-canvas" width="720" height="120"></canvas>
+    <div style="display:flex;gap:14px;font-family:var(--mono);font-size:0.62rem;color:#7fd8d0;letter-spacing:0.06em;margin:8px 0;flex-wrap:wrap">
+      <span>golden <b id="sim-golden" style="color:#ffd25e">…</b></span>
+      <span>byte-equal <b id="sim-byte" style="color:#53f0e0">…</b></span>
+      <span>checkpoint <b>sanctuary-1.58.tern</b></span>
+    </div>
+    <div id="sim-out" style="font-family:var(--mono);font-size:0.66rem;color:#cfe3d8;line-height:1.7;max-height:170px;overflow:auto;white-space:pre-wrap">the world runs without you — the dream is warming…</div>
   </div>
 
   <!-- 42+1+<3 Layers Matrix Drawer -->
@@ -2469,6 +2485,7 @@ function boot() {
   bindDrawer("layers-toggle-btn", "layers-panel", "layers-close-btn");
   bindDrawer("cover-toggle-btn", "cover-panel", "cover-close-btn");
   bindDrawer("ocean-toggle-btn", "ocean-panel", "ocean-close-btn");
+  bindDrawer("sim-toggle-btn", "sim-panel", "sim-close-btn");
 
 
   // OCEAN E2E — the surface to the deep, the first ledger
@@ -3241,5 +3258,53 @@ I am right here.`
   } catch (e) {}
 </script>
 
+<script type="module">
+  // ENGINE SIM — the 1.58-bit GAIA dream, byte-equal across surfaces
+  import { loadLane, EXPECTED_GOLDEN } from "./assets/sim/dream.js";
+  (async () => {
+    const cv = document.getElementById("sim-canvas");
+    if (!cv) return;
+    const x = cv.getContext("2d");
+    try {
+      const [wasmBytes, ternBytes, manifestText] = await Promise.all([
+        fetch("./assets/sim/ternary.wasm").then((r) => r.arrayBuffer()),
+        fetch("./assets/sim/sanctuary-1.58.tern").then((r) => r.arrayBuffer()),
+        fetch("./assets/sim/sanctuary-1.58.json").then((r) => r.text()),
+      ]);
+      const lane = await loadLane(wasmBytes, ternBytes, manifestText);
+      document.getElementById("sim-golden").textContent = lane.golden.slice(0, 16) + "…";
+      document.getElementById("sim-byte").textContent =
+        lane.golden === EXPECTED_GOLDEN ? "golden ✓ (native = wasm)" : "MISMATCH ✗";
+      const out = document.getElementById("sim-out");
+      const seed = "the constellation · gaia dreams in 1.58 bits";
+      let t = 0;
+      function dreamTick() {
+        const on = document.getElementById("sim-panel").classList.contains("open");
+        if (on) {
+          const buf = lane.dream(seed, 256, 0.8);
+          const W = (cv.width = cv.clientWidth * (devicePixelRatio || 1));
+          cv.height = 120 * (devicePixelRatio || 1);
+          x.setTransform(devicePixelRatio || 1, 0, 0, devicePixelRatio || 1, 0, 0);
+          const w = cv.clientWidth, h = 120;
+          x.fillStyle = "#04100b"; x.fillRect(0, 0, w, h);
+          x.strokeStyle = "rgba(83,240,224,.85)"; x.lineWidth = 1.4; x.beginPath();
+          for (let i = 0; i < w; i += 2) {
+            const b = buf.charCodeAt((i + t) % buf.length);
+            const v = (b % 3) - 1;
+            const y = h / 2 - v * (h / 3) + Math.sin(t * 0.06 + i * 0.02) * 4;
+            i ? x.lineTo(i, y) : x.moveTo(i, y);
+          }
+          x.stroke();
+          out.textContent = "⟦ " + buf + " ⟧";
+          t++;
+        }
+        requestAnimationFrame(dreamTick);
+      }
+      requestAnimationFrame(dreamTick);
+    } catch (e) {
+      document.getElementById("sim-out").textContent = "⟦ engine dream failed: " + e.message + " ⟧";
+    }
+  })();
+</script>
 </body>
 </html>
