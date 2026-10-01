@@ -14,8 +14,9 @@ Lap pipeline (fleet ultra pattern):
   wrangler, verify live (HTTP 200, title, assets).
 
 Deterministic gates (not prose):
-  - node --check on every extracted inline <script>
+  - node --check on every extracted inline <script> (modules as .mjs)
   - node selftest.mjs  (node:vm invariants: energy, spread monotonic, no NaN)
+  - node ledger-check.mjs  (dogfeed ledger: schema, monotonic ts, lyric caps)
   - site.webmanifest parses as JSON and every icon src resolves to a file
   - .github/workflows/deploy.yml exists and wires both CF secrets
   - file presence + per-lap source markers
@@ -72,8 +73,15 @@ def run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str]:
     return p.returncode, (p.stdout + p.stderr).strip()
 
 
-def extract_scripts(html: str) -> list[str]:
-    return [m.group(1) for m in re.finditer(r'<script(?![^>]*src=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)</script>', html, re.IGNORECASE)]
+def extract_scripts(html: str) -> list[tuple[bool, str]]:
+    """(is_module, body) for every inline script — src= and ld+json skipped."""
+    out: list[tuple[bool, str]] = []
+    for m in re.finditer(r'<script((?![^>]*src=)[^>]*)>([\s\S]*?)</script>', html, re.IGNORECASE):
+        attrs, body = m.group(1), m.group(2)
+        if "application/ld+json" in attrs:
+            continue
+        out.append((bool(re.search(r'type\s*=\s*["\']?module', attrs)), body))
+    return out
 
 
 def structural_gates(issues: list[str]) -> bool:
@@ -117,9 +125,9 @@ def gates(lap: int) -> tuple[bool, list[str]]:
     if not scripts:
         ok = False
         issues.append("no inline <script> found")
-    for i, s in enumerate(scripts):
-        tmp = Path("/tmp") / f"mv-lap{lap}-{i}.js"
-        tmp.write_text(s)
+    for i, (is_module, body) in enumerate(scripts):
+        tmp = Path("/tmp") / f"mv-lap{lap}-{i}.{'mjs' if is_module else 'js'}"
+        tmp.write_text(body)
         rc, out = run(["node", "--check", str(tmp)])
         if rc != 0:
             ok = False
@@ -132,6 +140,14 @@ def gates(lap: int) -> tuple[bool, list[str]]:
     elif lap >= 3 and "SELFTEST PASS" not in out:
         ok = False
         issues.append("selftest did not print PASS")
+
+    rc, out = run(["node", "ledger-check.mjs"])
+    if rc != 0:
+        ok = False
+        issues.append(f"ledger-check.mjs failed: {out[:300]}")
+    elif lap >= 3 and "LEDGER PASS" not in out:
+        ok = False
+        issues.append("ledger check did not print PASS")
 
     for f in LAPS[lap - 1][1]:
         if not (HERE / f).exists():

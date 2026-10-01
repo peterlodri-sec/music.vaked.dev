@@ -15,17 +15,24 @@ streams what the site plays.
 """
 import json, os, subprocess, sys, time, urllib.request, urllib.parse
 
+SEP = "|||"
+LYRIC_CAP = 2000
+
 def nowplaying():
-    """(track, artist) from Apple Music via osascript, or (None, None)."""
+    """(track, artist) from Apple Music via osascript, or (None, None).
+
+    The separator is explicit: names and artists may themselves contain
+    commas ("Tyler, The Creator"), which a comma-split silently dropped.
+    """
     try:
         out = subprocess.run(
             ["osascript", "-e",
-             'tell application "Music" to {name, artist} of current track'],
+             'tell application "Music" to ((name of current track) & "' + SEP + '" & (artist of current track))'],
             capture_output=True, text=True, timeout=8)
         if out.returncode != 0:
             return None, None
-        parts = [p.strip() for p in out.stdout.split(", ")]
-        return (parts[0], parts[1]) if len(parts) == 2 else (None, None)
+        parts = out.stdout.strip().split(SEP)
+        return (parts[0].strip(), parts[1].strip()) if len(parts) == 2 else (None, None)
     except Exception:
         return None, None
 
@@ -45,7 +52,7 @@ def post_nowplaying(track, artist, song_lyrics):
         req = urllib.request.Request(
             "http://localhost:8787/nowplaying",
             data=json.dumps({"session_id": "music", "track": track,
-                             "artist": artist, "lyrics": song_lyrics[:2000]}).encode(),
+                             "artist": artist, "lyrics": song_lyrics[:LYRIC_CAP]}).encode(),
             headers={"Content-Type": "application/json",
                      **({"x-wa-token": secret} if secret else {})}, method="POST")
         urllib.request.urlopen(req, timeout=6)
@@ -69,7 +76,7 @@ def ledger_row(track, artist, song_lyrics, ts):
     try:
         with open(p, "a") as f:
             f.write(json.dumps({"ts": ts, "track": track, "artist": artist,
-                                "lyrics": song_lyrics[:2000]}) + "\n")
+                                "lyrics": song_lyrics[:LYRIC_CAP]}) + "\n")
         if os.environ.get("DOGFOOD") == "1":
             subprocess.run(["hf", "upload", "PeetPedro/ultrawhale-dogfood-bucket",
                             p, f"music/{ts}.jsonl"], capture_output=True, timeout=120)

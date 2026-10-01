@@ -39,3 +39,8 @@ committed on the session's push rhythm, not per-row: a perpetual-dirty
 working tree is the ledger's honest state, and an auto-commit would
 race the loop. If a row matters more than the rhythm, it already moved
 to the HF bucket too.
+
+- Schema: one JSON row per play — `ts` (UTC ISO 8601), `track`, `artist`,
+  `lyrics` (lrclib synced text, capped at 2000 chars; empty when absent).
+- Check: `node ledger-check.mjs` validates every row (schema, monotonic
+  timestamps, caps) and prints the stats. The backyard ultra gates run it.

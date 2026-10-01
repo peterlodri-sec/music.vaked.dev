@@ -5,6 +5,8 @@
 
   - parses index.html, extracts inline <script> blocks
   - runs them in node:vm with stubbed browser globals
+  - module scripts (type="module") cannot run in the classic vm harness;
+    they are syntax-checked with `node --check` on a temp .mjs instead
   - invokes pure engine functions and asserts invariants:
       * energy ∈ [0,1]
       * IDLE_BASELINE present and ≈ 0.15
@@ -15,21 +17,42 @@
   Usage: node selftest.mjs   (or: uv run --script selftest.mjs)
   Exit 0 on pass, 1 on fail.
 */
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { readFileSync, writeFileSync, mkdtempSync } from "node:fs";
+import { dirname, resolve, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { tmpdir } from "node:os";
+import { execFileSync } from "node:child_process";
 import vm from "node:vm";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const html = readFileSync(resolve(HERE, "index.html"), "utf8");
 
-const scripts = [...html.matchAll(/<script(?![^>]*src=)(?![^>]*type="application\/ld\+json")[^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(m => m[1])
-  .filter(s => s.trim().length > 0);
+const blocks = [...html.matchAll(/<script((?![^>]*src=)[^>]*)>([\s\S]*?)<\/script>/gi)]
+  .filter(m => !/application\/ld\+json/i.test(m[1]))
+  .map(m => ({ module: /type\s*=\s*["']?module/i.test(m[1]), body: m[2] }))
+  .filter(b => b.body.trim().length > 0);
+
+const scripts = blocks.filter(b => !b.module).map(b => b.body);
+const moduleScripts = blocks.filter(b => b.module).map(b => b.body);
 
 if (scripts.length === 0) {
   console.error("FAIL: no inline <script> blocks found");
   process.exit(1);
+}
+
+if (moduleScripts.length > 0) {
+  const dir = mkdtempSync(join(tmpdir(), "mv-selftest-"));
+  for (let i = 0; i < moduleScripts.length; i++) {
+    const file = join(dir, `module-${i}.mjs`);
+    writeFileSync(file, moduleScripts[i]);
+    try {
+      execFileSync(process.execPath, ["--check", file], { stdio: "pipe" });
+    } catch (err) {
+      const detail = (err.stderr || "").toString().trim().split("\n").slice(0, 4).join(" | ");
+      console.error(`FAIL: module script ${i} failed syntax check: ${detail}`);
+      process.exit(1);
+    }
+  }
 }
 
 function makeStub(el) {
@@ -37,6 +60,7 @@ function makeStub(el) {
     classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
     style: {}, textContent: "", appendChild() {}, getContext: () => null,
     addEventListener() {}, removeEventListener() {},
+    dataset: {}, querySelectorAll: () => [],
   };
 }
 
@@ -203,4 +227,4 @@ if (failures.length > 0) {
   for (const f of failures) console.error(`  - ${f}`);
   process.exit(1);
 }
-console.log(`SELFTEST PASS — ${scripts.length} inline script(s), ${Object.keys(engine).length} engine keys, energy=${energy.value.toFixed(3)}`);
+console.log(`SELFTEST PASS — ${scripts.length} classic + ${moduleScripts.length} module script(s) checked, ${Object.keys(engine).length} engine keys, energy=${energy.value.toFixed(3)}`);
