@@ -61,6 +61,10 @@
     background:var(--bg); color:var(--ink); font-family:var(--sans);
     overflow:hidden; -webkit-font-smoothing:antialiased;
   }
+  /* the constellation footer — the standard requires it in the DOM, but the TV
+     owns the viewport: kept here for crawlers and provenance, never painted.
+     it used to render at the top of the flow, over the whole page. */
+  #site-footer{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   #stage{position:fixed; inset:0; z-index:0; background:radial-gradient(120% 120% at 50% 42%, #1a1038 0%, #160b2e 70%)}
   #stage canvas{position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none}
 
@@ -3046,7 +3050,7 @@ I am right here.`
   });
 })();
 </script>
-<footer role="contentinfo" style="position:relative;z-index:10;padding:3rem 1.5rem;text-align:center;font-family:ui-monospace,monospace;font-size:0.75rem;color:#a59fc4;background:rgba(5,6,10,0.92);border-top:1px solid rgba(170,150,255,0.18);backdrop-filter:blur(16px);">
+<footer id="site-footer" role="contentinfo">
   <div style="margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.3em;color:#b48bff;font-weight:600;">the constellation · lovetta lane</div>
   <div style="margin-bottom:1rem;font-size:0.65rem;letter-spacing:0.22em;color:#a59fc4;text-transform:uppercase;">keep the weights warm</div>
   <div style="display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem;">
