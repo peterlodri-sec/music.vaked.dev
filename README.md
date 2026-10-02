@@ -18,6 +18,17 @@ Live URL: **[https://music.vaked.dev](https://music.vaked.dev)**
 - **24-Bit Lossless Master & Vinyl On-Demand**: Audio masters encoded in uncompressed 24-bit 96kHz/48kHz WAV format ready for 0 Ft upfront SoundCloud Vinyl On-Demand distribution.
 - **Cross-Site Integration**: Embedded via `<iframe id="musicbg" src="https://music.vaked.dev/" ... style="mix-blend-mode:screen; opacity:0.3"></iframe>` across the constellation.
 
+### Generative originals (synthesized from pure math — no samples, no cloud)
+
+| Track | Script | Shape |
+|---|---|---|
+| **All My Favorite Colors — Dream Come True Version (D+++)** | `dream_colors.py` | 432 Hz · 88 BPM · verse/chorus/bridge · boom-bap with a swung hat |
+| **Friends of Weed and Love (Space Floating)** | `space_floating.py` | 432 Hz · 76 BPM · ultra lo-fi Japanese fusion jazz × Texas desert space psychedelic · stereo, tape wobble, dub echo, sweeping phaser |
+
+Both render a 24-bit WAV master, a 320 kbps MP3, and liner notes into
+`~/Documents/music/`, and land a row in `.dogfeed-music.jsonl`
+(`node ledger-check.mjs` gates the ledger before push).
+
 ---
 
 ## 🌌 Constellation Sister Sites (The Lovetta Lane)
