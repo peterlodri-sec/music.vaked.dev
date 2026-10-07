@@ -42,6 +42,10 @@ spec (24-bit stereo 44.1 kHz) with ffmpeg — same output, same ledger row as
 the pure-math lanes. Override the voice with `VOICE_LANE_VOICE` and the
 binary path with `KOKORO_SPEAK`.
 
+The 320 kbps master is served on-site as `assets/voice/the-love-runtime-spoken-dedication.mp3`
+and surfaced by the **🎤 THE LOVE RUNTIME · SPOKEN** badge in the header —
+tap it to hear the runtime speak.
+
 ---
 
 ## 🌌 Constellation Sister Sites (The Lovetta Lane)

@@ -633,6 +633,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge" id="seed-badge" style="color:#00f0ff;border-color:rgba(0,240,255,.4);cursor:pointer" title="Click to cycle Seeds: n===0 (music.vaked.dev) ⇄ n===1 (Massano) ⇄ n===2 (RÜFÜS Joshua Tree) ⇄ TRIPLE ☯️">SEED: n===0 (music.vaked.dev)</span>
       <a href="https://github.com/celestial4498-prog/Celestial" target="_blank" rel="noopener" class="badge" style="color:#e0a96d;border-color:rgba(224,169,109,.4);text-decoration:none" title="Modular Universe Engine (27 Crates in Rust)">🌌 CELESTIAL (27 Crates)</a>
       <span class="badge mode-pill" id="header-toggle-btn" style="color:#62e6c9;border-color:rgba(98,230,201,.4);cursor:pointer" title="Toggle header collapse">⛶ COLLAPSE</span>
+      <span class="badge mode-pill" id="voice-toggle-btn" style="color:#b48bff;border-color:rgba(180,139,255,.45);cursor:pointer" title="The love runtime, spoken — kokoro-tiny · bm_george" onclick="var a=document.getElementById('voice-audio'); a.paused ? a.play() : a.pause()">🎤 THE LOVE RUNTIME · SPOKEN</span>
       <span class="badge">0 + 1</span>
       <span class="badge" id="badge-audio">audio — tap to start</span>
     </div>
@@ -3399,5 +3400,6 @@ I am right here.`
     }
   })();
 </script>
+  <audio id="voice-audio" src="assets/voice/the-love-runtime-spoken-dedication.mp3" preload="none"></audio>
 </body>
 </html>
