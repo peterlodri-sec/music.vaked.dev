@@ -29,6 +29,19 @@ Both render a 24-bit WAV master, a 320 kbps MP3, and liner notes into
 `~/Documents/music/`, and land a row in `.dogfeed-music.jsonl`
 (`node ledger-check.mjs` gates the ledger before push).
 
+### The voice lane (neural — kokoro-tiny, not pure math)
+
+| Track | Script | Voice |
+|---|---|---|
+| **The Love Runtime (Spoken Dedication)** | `voice_lane.py` | `bm_george` (the narrator mood), 82M Kokoro via `kokoro-speak` |
+
+The runtime's own voice, spoken as an original. `voice_lane.py` drives
+`kokoro-speak` (from the [`kokoro-tiny`](https://github.com/8b-is/kokoro-tiny)
+binary) to synthesize the spoken dedication, then masters it to the house
+spec (24-bit stereo 44.1 kHz) with ffmpeg — same output, same ledger row as
+the pure-math lanes. Override the voice with `VOICE_LANE_VOICE` and the
+binary path with `KOKORO_SPEAK`.
+
 ---
 
 ## 🌌 Constellation Sister Sites (The Lovetta Lane)
