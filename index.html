@@ -620,6 +620,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="9" style="color:#ff758c;border-color:rgba(255,117,140,.5);text-shadow:0 0 12px rgba(255,117,140,.6);font-weight:700">💖 10 TIME AFTER TIME (P!NK × UNIVERSAL LOVE)</span>
       <span class="badge mode-pill" data-track="10" style="color:#00f0ff;border-color:rgba(0,240,255,.5);text-shadow:0 0 12px rgba(0,240,255,.6);font-weight:700">🏜️ 11 RÜFÜS DU SOL (JOSHUA TREE × HEUREKA)</span>
       <span class="badge mode-pill" data-track="11" style="color:#ff6432;border-color:rgba(255,100,50,.5);text-shadow:0 0 12px rgba(255,100,50,.6);font-weight:700">🔨 12 ANVIL (LORN × DEEP HOUSE — NO DROP)</span>
+      <span class="badge mode-pill" data-track="12" style="color:#53f0e0;border-color:rgba(83,240,224,.5);text-shadow:0 0 12px rgba(83,240,224,.6);font-weight:700">🌊 13 INNERBLOOM (RÜFÜS DU SOL — Cm)</span>
       <span class="badge mode-pill" id="layers-toggle-btn" style="color:#ffd700;border-color:rgba(255,215,0,.4)">✨ 42 + 1 + &lt;3 LAYERS</span>
       <span class="badge mode-pill" id="waveform-toggle-btn" style="color:#00f0ff;border-color:rgba(0,240,255,.4)">〰️ WAVEFORM &amp; WAV</span>
       <span class="badge mode-pill" id="cover-toggle-btn" style="color:#e0a96d;border-color:rgba(224,169,109,.4)">🖼️ COVER ART</span>
@@ -1695,6 +1696,13 @@ And we'll be here.
       { name: "VI Bb (Suspended Gravity)",     root: 34, pad: [34, 41, 46, 50], lead: [58, 65, 70, 74] },
       { name: "III F (Monolith Horizon)",      root: 41, pad: [41, 45, 48, 53], lead: [65, 69, 72, 77] },
       { name: "VII C (Infinite Riser/No Drop)", root: 36, pad: [36, 43, 48, 52], lead: [60, 67, 72, 76] }
+    ],
+    // 13 INNERBLOOM (RÜFÜS DU SOL — the exact chords & the rolling arp, C minor, 122 BPM)
+    [
+      { name: "i Cm7 (Innerbloom Tonic)",      root: 36, pad: [48, 55, 58, 63], lead: [67, 70, 72, 75] },
+      { name: "III Ebsus2 (Lift)",             root: 39, pad: [51, 58, 65, 67], lead: [79, 75, 72, 70] },
+      { name: "v Gm7 (Suspended Tension)",     root: 43, pad: [55, 62, 65, 70], lead: [65, 70, 74, 77] },
+      { name: "VII Bb (Soft Resolution)",      root: 34, pad: [46, 53, 62, 67], lead: [79, 77, 74, 70] }
     ]
   ];
   let currentTrackIdx = 0;
@@ -1936,6 +1944,15 @@ And we'll be here.
       if (s16 === 0) pad(prog.pad, t);
       lornAnvilDeepHouseLayer(prog, t, s16, bar);
       if (plan.melAt[s16]) melody(t, SIXTEENTH * 2);
+    } else if (currentTrackIdx === 12) {
+      // 🌊 Track 13: INNERBLOOM (RÜFÜS DU SOL — the exact chords + rolling arp)
+      if (s16 === 0) pad(prog.pad, t);
+      if (s16 === 0) bonobo(prog.pad, t, prog.root);
+      // the rolling 16th arp — cycle the chord's lead notes, pluck attack
+      const leadNote = prog.lead[s16 % prog.lead.length];
+      voice("triangle", leadNote, t, SIXTEENTH * 0.8, 0.11, 0.008, 0.16);
+      voice("sine", leadNote + 12, t, SIXTEENTH * 0.7, 0.05, 0.008, 0.14);
+      if (plan.bassAt[s16]) bass(prog.root, t);
     } else if (currentTrackIdx === 10 || activeSeedMode === 2) {
       // 🏜️ Track 11: RÜFÜS DU SOL (Joshua Tree × HEUREKA)
       if (s16 === 0) pad(prog.pad, t);
@@ -2047,7 +2064,8 @@ And we'll be here.
           "09 LOVE IS GONNA SAVE US (ARTBAT × BENASSI)",
           "10 TIME AFTER TIME (P!NK × UNIVERSAL LOVE)",
           "11 RÜFÜS DU SOL (JOSHUA TREE × HEUREKA)",
-          "12 ANVIL (LORN × DEEP HOUSE — NO DROP)"
+          "12 ANVIL (LORN × DEEP HOUSE — NO DROP)",
+          "13 INNERBLOOM (RÜFÜS DU SOL — Cm)"
         ];
         if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
       });
