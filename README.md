@@ -8,7 +8,7 @@ Live URL: **[https://music.vaked.dev](https://music.vaked.dev)**
 
 ## ✦ Overview
 
-`music.vaked.dev` is the living ambient sound node of the **vaked.dev constellation**. It serves as an iframe audio-reactive background layer across `art.vaked.dev` and other ecosystem surfaces.
+`music.vaked.dev` is the living ambient sound node of the **vaked.dev constellation** — the front door to every surface is the hub at [koan.vaked.dev](https://koan.vaked.dev/). It serves as an iframe audio-reactive background layer across `art.vaked.dev` and other ecosystem surfaces.
 
 ### Key Features
 - **3D WebGL Wireframe Icosahedron & Particle Sphere**: Self-generating Fibonacci particle shell and audio-reactive 3D wireframe Icosahedron mesh that expands and pulses in 60FPS WebGL.
