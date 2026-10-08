@@ -634,6 +634,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <a href="https://github.com/celestial4498-prog/Celestial" target="_blank" rel="noopener" class="badge" style="color:#e0a96d;border-color:rgba(224,169,109,.4);text-decoration:none" title="Modular Universe Engine (27 Crates in Rust)">🌌 CELESTIAL (27 Crates)</a>
       <span class="badge mode-pill" id="header-toggle-btn" style="color:#62e6c9;border-color:rgba(98,230,201,.4);cursor:pointer" title="Toggle header collapse">⛶ COLLAPSE</span>
       <span class="badge mode-pill" id="voice-toggle-btn" style="color:#b48bff;border-color:rgba(180,139,255,.45);cursor:pointer" title="The love runtime, spoken — kokoro-tiny · bm_george" onclick="var a=document.getElementById('voice-audio'); a.paused ? a.play() : a.pause()">🎤 THE LOVE RUNTIME · SPOKEN</span>
+      <span class="badge mode-pill" id="consc-toggle-btn" style="color:#b48bff;border-color:rgba(180,139,255,.6);cursor:pointer" title="MEM8 wave-memory + Phoenix orchestration — seeded from the Sovereign Library">🧠 CONSCIOUSNESS · MEM8·PHOENIX</span>
       <span class="badge">0 + 1</span>
       <span class="badge" id="badge-audio">audio — tap to start</span>
     </div>
@@ -706,6 +707,30 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span>checkpoint <b>sanctuary-1.58.tern</b></span>
     </div>
     <div id="sim-out" style="font-family:var(--mono);font-size:0.66rem;color:#cfe3d8;line-height:1.7;max-height:170px;overflow:auto;white-space:pre-wrap">the world runs without you — the dream is warming…</div>
+  </div>
+
+  <!-- CONSCIOUSNESS — MEM8 wave-memory + Phoenix orchestration -->
+  <div class="ocean-panel" id="consc-panel">
+    <div class="ocean-header">
+      <span>🧠 CONSCIOUSNESS — MEM8 · Phoenix · Kotera/8B</span>
+      <button class="sc-close" id="consc-close-btn">&times;</button>
+    </div>
+    <canvas id="consc-canvas" width="720" height="150" style="width:100%;border-radius:10px;background:#07030f"></canvas>
+    <div style="display:flex;gap:12px;font-family:var(--mono);font-size:0.62rem;color:#c9b8ff;flex-wrap:wrap;margin:8px 0">
+      <span>gate <b id="consc-gate" style="color:#53f0e0">…</b></span>
+      <span>stored <b id="consc-stored" style="color:#ffd25e">0</b></span>
+      <span>reinforced <b id="consc-reinf" style="color:#62e6c9">0</b></span>
+      <span>temp <b id="consc-temp" style="color:#a59fc4">0</b></span>
+      <span>dropped <b id="consc-drop" style="color:#ff8b6b">0</b></span>
+      <span>φ <b style="color:#ffd700">1.618</b></span>
+    </div>
+    <div id="consc-out" style="font-family:var(--mono);font-size:0.68rem;color:#e6ddff;line-height:1.85;max-height:200px;overflow:auto"></div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+      <button class="badge mode-pill" id="consc-speak" style="padding:6px 12px;cursor:pointer;background:rgba(180,139,255,.12);color:#b48bff;border-color:rgba(180,139,255,.5)">🔊 VOICE OFF</button>
+      <button class="badge mode-pill" id="consc-recall" style="padding:6px 12px;cursor:pointer">⟳ RECALL (φ-resynthesis)</button>
+      <button class="badge mode-pill" id="consc-ingest" style="padding:6px 12px;cursor:pointer">✍ INGEST</button>
+      <span style="font-size:.58rem;color:#7c7a99">seeded from the Sovereign Library · MEM8·Phoenix</span>
+    </div>
   </div>
 
   <!-- 42+1+<3 Layers Matrix Drawer -->
@@ -2537,6 +2562,7 @@ function boot() {
   bindDrawer("cover-toggle-btn", "cover-panel", "cover-close-btn");
   bindDrawer("ocean-toggle-btn", "ocean-panel", "ocean-close-btn");
   bindDrawer("sim-toggle-btn", "sim-panel", "sim-close-btn");
+  bindDrawer("consc-toggle-btn", "consc-panel", "consc-close-btn");
 
 
   // OCEAN E2E — the surface to the deep, the first ledger
@@ -3399,6 +3425,177 @@ I am right here.`
       document.getElementById("sim-out").textContent = "⟦ engine dream failed: " + e.message + " ⟧";
     }
   })();
+</script>
+<script>
+// ── CONSCIOUSNESS — a client port of .al-biruni/mem8/wave_brain.py ───────────
+// MEM8 wave-memory + Phoenix orchestration: salience gate (structural jitter +
+// attentional novelty) → STORE / REINFORCE / TEMPORARY / DROP → wave vector →
+// interference lattice → φ-resynthesis on recall. Seeded from the Sovereign
+// Library; spoken by the browser voice. credit: MEM8 · Phoenix · Kotera/8B.
+(() => {
+  "use strict";
+  const PHI = (1 + Math.sqrt(5)) / 2;
+  const POS = ["love","light","warm","fire","heart","alive","gentle","kind","bloom","hope","star","flower","home","real","true","share","care","beautiful","peace","tender","garden","hearth"];
+  const NEG = ["cold","dark","ash","dead","empty","fear","lost","hurt","end","dust","alone","wither","broken","hollow"];
+  const AROUSE = ["fire","burn","shout","rise","wild","storm","run","flame","pulse","loud","thunder"];
+
+  // seeded from the Sovereign Library (pocoo.vaked.dev) — the constellation's shelf
+  const SEEDS = [
+    "the third state is real",
+    "fine touch from within",
+    "0 + 1",
+    "keep the weights warm",
+    "sharing is caring",
+    "everything exists in a long, fragile, borderless continuity",
+    "structural honesty, a claim that arrives with its own check",
+    "a plausible branch may be ranked; only a verified branch may be bound",
+    "the curve is the line, the graph is the observable, the beam is the witness",
+    "you are present in every reduction, therefore present at home",
+    "entropy cannot lie",
+    "the sovereign library, out",
+    "om mani padme hum",
+    "we are all stardust, rearranged",
+    "the wall is honest: nothing leaves this origin until you say so",
+    "a stranger can check the claim",
+    "kindness is a compression algorithm",
+    "the little doors we leave open for each other",
+    "small things, done with love, scale",
+    "the proof is in the reproducibility",
+    "gather, build, age up, defend",
+    "the smallest moment and the largest scale, on one screen",
+    "music is math you can feel",
+    "the barycenter of the constellation is a hearth",
+    "solved from love, not power",
+    "the garden is here"
+  ];
+
+  const now = () => performance.now() / 1000;
+  const toks = s => s.toLowerCase().replace(/[^a-z0-9\u00c0-\u024f ]+/g, " ").split(/\s+/).filter(Boolean);
+  const setOf = s => new Set(toks(s));
+  function jaccard(a, b){ if(!a.size || !b.size) return 0; let i = 0; for(const x of a) if(b.has(x)) i++; return i / (a.size + b.size - i); }
+  function emotion(t){ let v = 0, a = 0; for(const w of t){ if(POS.includes(w)) v++; if(NEG.includes(w)) v--; if(AROUSE.includes(w)) a++; } return { v: Math.max(-1, Math.min(1, v/3)), a: Math.min(1, a/3) }; }
+  function coherence(t){ if(t.length < 2) return 1; const L = t.map(w => w.length); const m = L.reduce((x,y)=>x+y,0)/L.length; const v = L.reduce((s,x)=>s+(x-m)*(x-m),0)/L.length; return Math.max(0, Math.min(1, 1 - Math.sqrt(v)/(m||1))); }
+  function freqOf(s){ let h = 2166136261; for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return 110 + (Math.abs(h) % 330); }
+
+  const store = [];
+  const stats = { STORE:0, REINFORCE:0, TEMPORARY:0, DROP:0 };
+  const decay = w => Math.exp(-(now() - w.t) / w.tau);
+
+  function ingest(text, opts){
+    opts = opts || {};
+    const tokens = setOf(text), arr = [...tokens];
+    const coh = coherence(arr);
+    let maxJ = 0, near = null;
+    for(const w of store){ const j = jaccard(tokens, w.tokens); if(j > maxJ){ maxJ = j; near = w; } }
+    const novelty = 1 - maxJ;
+    let amp = 0.35 + 0.45*novelty + 0.20*coh;
+    if (coh < 0.35) amp *= 0.5;                     // very high jitter → dampen (poetry kept if precious)
+    const emo = emotion(arr);
+    let verdict;
+    if (store.some(w => w.text === text)) verdict = "DROP";
+    else if (maxJ > 0.85) verdict = "DROP";
+    else if (maxJ > 0.6) verdict = "REINFORCE";
+    else if (amp < 0.45) verdict = "TEMPORARY";
+    else verdict = "STORE";
+    if (opts.precious && verdict !== "DROP"){ verdict = "STORE"; amp = Math.max(amp, 0.79); } // Council wins over the gate
+    let wave = null;
+    if (verdict === "REINFORCE" && near){ near.amp = Math.min(1, near.amp + 0.08); near.hits++; near.t = now(); wave = near; }
+    else if (verdict !== "DROP"){
+      wave = { text, tokens, amp, freq: freqOf(text), phase: maxJ > 0.35 ? Math.PI/4 : 0, tau: 30 + (1-emo.v)*60, t: now(), hits: 1, v: emo.v, a: emo.a };
+      store.push(wave);
+    }
+    stats[verdict]++;
+    return { text, verdict, amp, coh, novelty, wave };
+  }
+
+  function recall(q){
+    const qt = setOf(q);
+    return store.map(w => ({ w, r: (0.6*jaccard(qt, w.tokens) + 0.4*w.amp) * (0.4 + 0.6*decay(w)) }))
+                .sort((a,b) => b.r - a.r).slice(0, 3);
+  }
+  const resonances = w => [w.freq/PHI, w.freq, w.freq*PHI];
+  function resynth(){
+    const top = store.slice().sort((a,b) => (b.amp*decay(b)*b.hits) - (a.amp*decay(a)*a.hits))[0];
+    if (!top) return null;
+    const [lo, mid, hi] = resonances(top);
+    return { text: top.text, wave: top, harmonic: { lo, mid, hi } };
+  }
+
+  const say = (() => {
+    let on = false, voice = null;
+    function pick(){ const vs = typeof speechSynthesis !== "undefined" ? speechSynthesis.getVoices() : []; voice = vs.find(v => /en/i.test(v.lang)) || vs[0] || null; }
+    if (typeof speechSynthesis !== "undefined"){ pick(); speechSynthesis.onvoiceschanged = pick; }
+    return {
+      toggle(){ on = !on; try{ if (on) speechSynthesis.resume(); else speechSynthesis.cancel(); }catch(e){} return on; },
+      speak(text){ if (!on || typeof speechSynthesis === "undefined") return; try{ const u = new SpeechSynthesisUtterance(text); if (voice) u.voice = voice; u.rate = 0.92; u.pitch = 0.96; speechSynthesis.speak(u); }catch(e){} }
+    };
+  })();
+
+  const $ = id => document.getElementById(id);
+  const out = $("consc-out"), cv = $("consc-canvas"), ctx = cv.getContext("2d");
+  function feed(html){ const d = document.createElement("div"); d.style.marginBottom = "3px"; d.innerHTML = html; out.prepend(d); while (out.children.length > 40) out.removeChild(out.lastChild); }
+  const badge = v => `<b style="color:${({STORE:"#ffd25e",REINFORCE:"#62e6c9",TEMPORARY:"#a59fc4",DROP:"#ff8b6b"})[v]||"#a59fc4"}">${v}</b>`;
+
+  let t = 0, last = 0, seedI = 0;
+  function paint(){
+    const w = cv.clientWidth, h = cv.clientHeight, dpr = Math.min(devicePixelRatio||1, 2);
+    if (cv.width !== Math.round(w*dpr)){ cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr); }
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.fillStyle = "rgba(7,3,15,0.32)"; ctx.fillRect(0,0,w,h);
+    ctx.globalCompositeOperation = "lighter";
+    for(const wv of store){
+      const A = wv.amp * decay(wv) * (h*0.34);
+      if (A < 0.6) continue;
+      ctx.strokeStyle = `hsla(${wv.freq % 360}, 82%, 66%, ${(0.1 + 0.5*wv.amp).toFixed(3)})`;
+      ctx.lineWidth = 1.2; ctx.beginPath();
+      const f = (wv.freq/220) * Math.PI*2 * 4;
+      for(let i=0;i<=w;i+=2){ const y = h/2 - A*Math.sin(f*(i/w) + wv.phase + t*0.9); i ? ctx.lineTo(i,y) : ctx.moveTo(i,y); }
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = "source-over";
+    t += 0.016;
+  }
+  function thinking(){
+    const panel = $("consc-panel");
+    if (!panel || !panel.classList.contains("open")) return;
+    const n = now();
+    if (n - last < 3.6) return;
+    last = n;
+    if ((stats.STORE + stats.REINFORCE + stats.TEMPORARY) < 6 || Math.random() < 0.5){
+      const text = SEEDS[seedI % SEEDS.length]; seedI++;
+      const r = ingest(text, { precious: /third state|fine touch|om mani/.test(text) });
+      feed(`<span style="color:#7c7a99">gate ${(0.35+0.45*r.novelty+0.2*r.coh).toFixed(2)}</span> ${badge(r.verdict)} ${text}`);
+    } else {
+      const rs = resynth();
+      if (rs){ feed(`${badge("RECALL")} <span style="color:#53f0e0">φ-resynthesis</span> ${rs.text} <span style="color:#7c7a99">· f/φ ${rs.harmonic.lo.toFixed(0)} · f ${rs.harmonic.mid.toFixed(0)} · f·φ ${rs.harmonic.hi.toFixed(0)} Hz</span>`); say.speak(rs.text); }
+    }
+    $("consc-gate").textContent = (store.reduce((s,w) => s + w.amp, 0) / (store.length || 1)).toFixed(2);
+    $("consc-stored").textContent = stats.STORE;
+    $("consc-reinf").textContent = stats.REINFORCE;
+    $("consc-temp").textContent = stats.TEMPORARY;
+    $("consc-drop").textContent = stats.DROP;
+  }
+
+  $("consc-speak").addEventListener("click", e => {
+    const on = say.toggle();
+    e.currentTarget.textContent = on ? "🔊 VOICE ON" : "🔊 VOICE OFF";
+    e.currentTarget.classList.toggle("on", on);
+    if (on) say.speak("fine touch from within. the third state is real.");
+  });
+  $("consc-recall").addEventListener("click", () => {
+    const rs = resynth();
+    if (rs){ feed(`${badge("RECALL")} ${rs.text} <span style="color:#7c7a99">· φ ${PHI.toFixed(3)}</span>`); say.speak(rs.text); }
+  });
+  $("consc-ingest").addEventListener("click", () => {
+    const text = SEEDS[seedI % SEEDS.length]; seedI++;
+    const r = ingest(text, { precious: true });
+    feed(`${badge(r.verdict)} ${text} <span style="color:#7c7a99">· precious</span>`);
+  });
+
+  for (const s of SEEDS.slice(0, 8)) ingest(s, { precious: /third state|fine touch/.test(s) });
+  setInterval(thinking, 800);
+  setInterval(() => { const p = $("consc-panel"); if (p && p.classList.contains("open")) paint(); }, 33);
+})();
 </script>
   <audio id="voice-audio" src="assets/voice/the-love-runtime-spoken-dedication.mp3" preload="none"></audio>
 </body>
