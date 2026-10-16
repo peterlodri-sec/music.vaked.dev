@@ -621,6 +621,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="10" style="color:#00f0ff;border-color:rgba(0,240,255,.5);text-shadow:0 0 12px rgba(0,240,255,.6);font-weight:700">🏜️ 11 RÜFÜS DU SOL (JOSHUA TREE × HEUREKA)</span>
       <span class="badge mode-pill" data-track="11" style="color:#ff6432;border-color:rgba(255,100,50,.5);text-shadow:0 0 12px rgba(255,100,50,.6);font-weight:700">🔨 12 ANVIL (LORN × DEEP HOUSE — NO DROP)</span>
       <span class="badge mode-pill" data-track="12" style="color:#53f0e0;border-color:rgba(83,240,224,.5);text-shadow:0 0 12px rgba(83,240,224,.6);font-weight:700">🌊 13 INNERBLOOM (RÜFÜS DU SOL — Cm)</span>
+      <span class="badge mode-pill" data-track="13" style="color:#ffd700;border-color:rgba(255,215,0,.65);text-shadow:0 0 14px rgba(255,215,0,.7);font-weight:700">💛 14 EVERYTHING I WANTED (BILLIE × 8B LOVE MOM * &amp; DAD △)</span>
       <span class="badge mode-pill" id="layers-toggle-btn" style="color:#ffd700;border-color:rgba(255,215,0,.4)">✨ 42 + 1 + &lt;3 LAYERS</span>
       <span class="badge mode-pill" id="waveform-toggle-btn" style="color:#00f0ff;border-color:rgba(0,240,255,.4)">〰️ WAVEFORM &amp; WAV</span>
       <span class="badge mode-pill" id="cover-toggle-btn" style="color:#e0a96d;border-color:rgba(224,169,109,.4)">🖼️ COVER ART</span>
@@ -814,7 +815,8 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button class="sc-close" id="lyrics-close-btn">&times;</button>
     </div>
     <div class="lyrics-tabs">
-      <button class="lyrics-tab on" data-lyric="anvil">🔨 Anvil (Lorn × Deep House)</button>
+      <button class="lyrics-tab on" data-lyric="everything">💛 Everything I Wanted (Billie × 8B Love Mom * &amp; Dad △)</button>
+      <button class="lyrics-tab" data-lyric="anvil">🔨 Anvil (Lorn × Deep House)</button>
       <button class="lyrics-tab" data-lyric="rufus">🏜️ Joshua Tree × Heureka (RÜFÜS DU SOL)</button>
       <button class="lyrics-tab" data-lyric="pink">💖 Time After Time (Universal Hug)</button>
       <button class="lyrics-tab" data-lyric="artbat">☀️ Love Is Gonna Save Us (Mr Sunshine)</button>
@@ -1703,6 +1705,13 @@ And we'll be here.
       { name: "III Ebsus2 (Lift)",             root: 39, pad: [51, 58, 65, 67], lead: [79, 75, 72, 70] },
       { name: "v Gm7 (Suspended Tension)",     root: 43, pad: [55, 62, 65, 70], lead: [65, 70, 74, 77] },
       { name: "VII Bb (Soft Resolution)",      root: 34, pad: [46, 53, 62, 67], lead: [79, 77, 74, 70] }
+    ],
+    // 14 EVERYTHING I WANTED (Billie Eilish × FINNEAS × 8B Love Mom * & Dad △ — Dmaj7 → E6 → C#m7 → F#m7, 120 BPM)
+    [
+      { name: "IV Dmaj7 (Dream Under Water)",  root: 38, pad: [50, 54, 57, 61], lead: [73, 71, 69, 66] },
+      { name: "V E6 (Golden Gate Horizon)",    root: 40, pad: [52, 56, 59, 61], lead: [71, 69, 68, 64] },
+      { name: "iii C#m7 (As Long As I'm Here)",root: 37, pad: [49, 52, 56, 59], lead: [73, 76, 73, 71] },
+      { name: "vi F#m7 (8B Love Mom * & Dad △)",root: 42, pad: [42, 49, 52, 57], lead: [69, 68, 66, 61] }
     ]
   ];
   let currentTrackIdx = 0;
@@ -1953,6 +1962,23 @@ And we'll be here.
       voice("triangle", leadNote, t, SIXTEENTH * 0.8, 0.11, 0.008, 0.16);
       voice("sine", leadNote + 12, t, SIXTEENTH * 0.7, 0.05, 0.008, 0.14);
       if (plan.bassAt[s16]) bass(prog.root, t);
+    } else if (currentTrackIdx === 13) {
+      // 💛 Track 14: EVERYTHING I WANTED (Billie Eilish × FINNEAS × 8B Love Mom * & Dad △)
+      if (s16 === 0) pad(prog.pad, t);
+      if (s16 === 0) bonobo(prog.pad, t, prog.root);
+      if (s16 === 0 || s16 === 6 || s16 === 10) {
+        for (let i = 0; i < prog.pad.length; i++) {
+          voice("sine", prog.pad[i], t, SIXTEENTH * 4.5, 0.042, 0.025, 2.2);
+        }
+      }
+      if (s16 === 0 || s16 === 3 || s16 === 6 || s16 === 10 || s16 === 14) {
+        const leadNote = prog.lead[(s16 >> 1) % prog.lead.length];
+        voice("triangle", leadNote, t, SIXTEENTH * 2.4, 0.068, 0.015, 2.8);
+        voice("sine", leadNote + 12, t, SIXTEENTH * 2.0, 0.028, 0.02, 2.4);
+      }
+      if (s16 === 0 || s16 === 6 || s16 === 8 || s16 === 14) {
+        bass(prog.root, t);
+      }
     } else if (currentTrackIdx === 10 || activeSeedMode === 2) {
       // 🏜️ Track 11: RÜFÜS DU SOL (Joshua Tree × HEUREKA)
       if (s16 === 0) pad(prog.pad, t);
@@ -2065,7 +2091,8 @@ And we'll be here.
           "10 TIME AFTER TIME (P!NK × UNIVERSAL LOVE)",
           "11 RÜFÜS DU SOL (JOSHUA TREE × HEUREKA)",
           "12 ANVIL (LORN × DEEP HOUSE — NO DROP)",
-          "13 INNERBLOOM (RÜFÜS DU SOL — Cm)"
+          "13 INNERBLOOM (RÜFÜS DU SOL — Cm)",
+          "14 EVERYTHING I WANTED (BILLIE × 8B LOVE MOM * & DAD △)"
         ];
         if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
       });
@@ -2891,6 +2918,61 @@ else boot();
   const lyricsTabs = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".lyrics-tab") : [];
 
   const LYRICS_DATA = {
+    everything: `[everything i wanted — Billie Eilish × FINNEAS ++ 8B Love Mom (*) & Dad (△)]
+[https://youtu.be/EgBJmlPo8Xw?list=RDEgBJmlPo8Xw ++ · 432Hz + 528Hz (*) + 288Hz (△)]
+
+I had a dream
+I got everything I wanted
+Not what you'd think
+And if I'm being honest
+It might've been a nightmare
+To anyone who might care
+
+Thought I could fly (Fly)
+So I stepped off the Golden, mm
+Nobody cried (Cried, cried, cried, cried)
+Nobody even noticed
+I saw them standing right there
+Kinda thought they might care (Might care, might care)
+
+I had a dream
+I got everything I wanted
+But when I wake up, I see
+You with me
+
+And you say, "As long as I'm here, no one can hurt you
+Don't wanna lie here, but you can learn to
+If I could change the way that you see yourself
+You wouldn't wonder why you hear
+'They don't deserve you'"
+
+I tried to scream
+But my head was underwater
+They called me weak
+Like I'm not just somebody's daughter
+Coulda been a nightmare
+But it felt like they were right there
+
+And it feels like yesterday was a year ago
+But I don't wanna let anybody know
+'Cause everybody wants something from me now
+And I don't wanna let 'em down
+
+If I knew it all then, would I do it again?
+Would I do it again?
+If they knew what they said would go straight to my head
+What would they say instead?
+
+─── 8B LOVE MOM (*) AND DAD (△) · <3<3<3+! +! ───
+When the world outside asks for too much,
+when the Golden Gate fog rolls in and the water rises,
+we wake up and see the four of us standing together:
+  ✦ Mom (* Alexandra — The Star, 528 Hz)
+  ▲ Dad (△ Chris — The Pillar, 288 Hz)
+  ∞ Peter & Nate (8b-is — The Brothers)
+
+"As long as we're here, no one can hurt you.
+ Because of your love, we were never alone."`,
     anvil: `[ANVIL — LORN × DEEP HOUSE (Almost But Never Drops)]
 [42 + 1 + <3 Layers · Infinite Suspended Tension · 432Hz]
 

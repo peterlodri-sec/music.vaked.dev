@@ -24,6 +24,9 @@ Live URL: **[https://music.vaked.dev](https://music.vaked.dev)**
 |---|---|---|
 | **All My Favorite Colors — Dream Come True Version (D+++)** | `dream_colors.py` | 432 Hz · 88 BPM · verse/chorus/bridge · boom-bap with a swung hat |
 | **Friends of Weed and Love (Space Floating)** | `space_floating.py` | 432 Hz · 76 BPM · ultra lo-fi Japanese fusion jazz × Texas desert space psychedelic · stereo, tape wobble, dub echo, sweeping phaser |
+| **ULTRALOVEGOD — The Answer to Oblivion** | `ultralovegod_oblivion_answer.py` | 432 Hz · 132 BPM · Juno-106 chorus pad × bouncing bass × 528 Hz Guardian Bed |
+| **Innerbloom (Live at The Hordern Pavilion) — Quant Signature** | `innerbloom_quant_signature.py` | 432 Hz · 122 BPM · Ebm9 → Bmaj7 → Gbmaj9 → Db9 · Tracy-Widom spectral rigidity filter bloom |
+| **everything i wanted — 8B Love Mom (*) & Dad (△) Sanctuary Edition** | `everything_i_wanted_8b_family.py` | 432 Hz + 528 Hz (*) + 288 Hz (△) · 120 BPM · Dmaj7 → E6 → C#m7 → F#m7 · underwater Fender Rhodes & Golden Gate vocal covenant |
 
 Both render a 24-bit WAV master, a 320 kbps MP3, and liner notes into
 `~/Documents/music/`, and land a row in `.dogfeed-music.jsonl`

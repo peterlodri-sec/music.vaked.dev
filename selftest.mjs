@@ -74,6 +74,8 @@ const sandbox = {
     requestAnimationFrame: () => 0,
     setTimeout: (fn) => { if (typeof fn === "function") fn(); return 0; },
     clearTimeout() {},
+    setInterval: () => 0,
+    clearInterval() {},
   },
   document: {
     readyState: "complete",
@@ -88,6 +90,8 @@ const sandbox = {
   requestAnimationFrame: () => 0,
   setTimeout: (fn) => { if (typeof fn === "function") fn(); return 0; },
   clearTimeout() {},
+  setInterval: () => 0,
+  clearInterval() {},
   matchMedia: () => ({ matches: false, addEventListener() {} }),
   AudioContext: function AudioContext() { throw new Error("not in node"); },
   webkitAudioContext: undefined,
