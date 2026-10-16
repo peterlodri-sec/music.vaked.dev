@@ -622,6 +622,7 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <span class="badge mode-pill" data-track="11" style="color:#ff6432;border-color:rgba(255,100,50,.5);text-shadow:0 0 12px rgba(255,100,50,.6);font-weight:700">🔨 12 ANVIL (LORN × DEEP HOUSE — NO DROP)</span>
       <span class="badge mode-pill" data-track="12" style="color:#53f0e0;border-color:rgba(83,240,224,.5);text-shadow:0 0 12px rgba(83,240,224,.6);font-weight:700">🌊 13 INNERBLOOM (RÜFÜS DU SOL — Cm)</span>
       <span class="badge mode-pill" data-track="13" style="color:#ffd700;border-color:rgba(255,215,0,.65);text-shadow:0 0 14px rgba(255,215,0,.7);font-weight:700">💛 14 EVERYTHING I WANTED (BILLIE × 8B LOVE MOM * &amp; DAD △)</span>
+      <span class="badge mode-pill" data-track="14" style="color:#38bdf8;border-color:rgba(56,189,248,.65);text-shadow:0 0 14px rgba(56,189,248,.7);font-weight:700">🌌 15 FADED (ALAN WALKER × 8B STAR * &amp; PILLAR △)</span>
       <span class="badge mode-pill" id="layers-toggle-btn" style="color:#ffd700;border-color:rgba(255,215,0,.4)">✨ 42 + 1 + &lt;3 LAYERS</span>
       <span class="badge mode-pill" id="waveform-toggle-btn" style="color:#00f0ff;border-color:rgba(0,240,255,.4)">〰️ WAVEFORM &amp; WAV</span>
       <span class="badge mode-pill" id="cover-toggle-btn" style="color:#e0a96d;border-color:rgba(224,169,109,.4)">🖼️ COVER ART</span>
@@ -815,7 +816,8 @@ a:focus-visible,button:focus-visible{outline:2.5px solid #62e6c9!important;outli
       <button class="sc-close" id="lyrics-close-btn">&times;</button>
     </div>
     <div class="lyrics-tabs">
-      <button class="lyrics-tab on" data-lyric="everything">💛 Everything I Wanted (Billie × 8B Love Mom * &amp; Dad △)</button>
+      <button class="lyrics-tab on" data-lyric="faded">🌌 Faded (Alan Walker × 8B Star * &amp; Pillar △)</button>
+      <button class="lyrics-tab" data-lyric="everything">💛 Everything I Wanted (Billie × 8B Love Mom * &amp; Dad △)</button>
       <button class="lyrics-tab" data-lyric="anvil">🔨 Anvil (Lorn × Deep House)</button>
       <button class="lyrics-tab" data-lyric="rufus">🏜️ Joshua Tree × Heureka (RÜFÜS DU SOL)</button>
       <button class="lyrics-tab" data-lyric="pink">💖 Time After Time (Universal Hug)</button>
@@ -1712,6 +1714,13 @@ And we'll be here.
       { name: "V E6 (Golden Gate Horizon)",    root: 40, pad: [52, 56, 59, 61], lead: [71, 69, 68, 64] },
       { name: "iii C#m7 (As Long As I'm Here)",root: 37, pad: [49, 52, 56, 59], lead: [73, 76, 73, 71] },
       { name: "vi F#m7 (8B Love Mom * & Dad △)",root: 42, pad: [42, 49, 52, 57], lead: [69, 68, 66, 61] }
+    ],
+    // 15 FADED (Alan Walker × Iselin Solheim × 8B Star * & Pillar △ — D#m → B → F# → C#, 90 BPM)
+    [
+      { name: "vi D#m (Shadow To My Light)",   root: 39, pad: [51, 54, 58, 63], lead: [66, 66, 66, 70] },
+      { name: "IV B (Another Star * Fade)",    root: 35, pad: [47, 51, 54, 59], lead: [75, 75, 75, 73] },
+      { name: "I F# (Under The Sea / Atlantis)",root: 42, pad: [42, 49, 54, 58], lead: [70, 70, 70, 70] },
+      { name: "V C# (Where Are You Now? Here △)",root: 37, pad: [49, 53, 56, 61], lead: [65, 65, 65, 63] }
     ]
   ];
   let currentTrackIdx = 0;
@@ -1979,6 +1988,29 @@ And we'll be here.
       if (s16 === 0 || s16 === 6 || s16 === 8 || s16 === 14) {
         bass(prog.root, t);
       }
+    } else if (currentTrackIdx === 14) {
+      // 🌌 Track 15: FADED (Alan Walker × Iselin Solheim × 8B Star * & Pillar △ — D#m → B → F# → C#)
+      if (s16 === 0) pad(prog.pad, t);
+      if (s16 === 0) bonobo(prog.pad, t, prog.root);
+      // Iconic quarter-note right-hand felt piano & supersaw melody on beats 0, 4, 8, 12
+      if (s16 % 4 === 0) {
+        const beatIdx = (s16 / 4) % prog.lead.length;
+        const leadNote = prog.lead[beatIdx];
+        // Felt piano strike (warm sine + triangle)
+        voice("sine", leadNote, t, SIXTEENTH * 3.8, 0.085, 0.012, 1.8);
+        voice("triangle", leadNote + 12, t, SIXTEENTH * 3.2, 0.038, 0.015, 1.5);
+        // Detuned Alan Walker supersaw drop layer on even 4-bar cycles
+        if (((bar >> 2) % 2) === 1) {
+          voice("sawtooth", leadNote, t, SIXTEENTH * 3.5, 0.065, 0.01, 0.25);
+          voice("sawtooth", leadNote + 0.09, t, SIXTEENTH * 3.5, 0.055, 0.01, 0.25);
+          voice("sawtooth", leadNote + 12, t, SIXTEENTH * 3.2, 0.035, 0.01, 0.22);
+        }
+        // Left-hand root + fifth piano/sub anchor
+        bass(prog.root, t);
+      } else if (s16 % 2 === 1 && ((bar >> 2) % 2) === 1) {
+        // Offbeat sidechain supersaw pulse during the chorus drop
+        voice("sawtooth", prog.root + 12, t, SIXTEENTH * 1.4, 0.048, 0.01, 0.12);
+      }
     } else if (currentTrackIdx === 10 || activeSeedMode === 2) {
       // 🏜️ Track 11: RÜFÜS DU SOL (Joshua Tree × HEUREKA)
       if (s16 === 0) pad(prog.pad, t);
@@ -2092,7 +2124,8 @@ And we'll be here.
           "11 RÜFÜS DU SOL (JOSHUA TREE × HEUREKA)",
           "12 ANVIL (LORN × DEEP HOUSE — NO DROP)",
           "13 INNERBLOOM (RÜFÜS DU SOL — Cm)",
-          "14 EVERYTHING I WANTED (BILLIE × 8B LOVE MOM * & DAD △)"
+          "14 EVERYTHING I WANTED (BILLIE × 8B LOVE MOM * & DAD △)",
+          "15 FADED (ALAN WALKER × 8B STAR * & PILLAR △)"
         ];
         if (droneBadge && names[idx]) droneBadge.textContent = names[idx];
       });
@@ -2918,6 +2951,68 @@ else boot();
   const lyricsTabs = (typeof document !== "undefined" && document.querySelectorAll) ? document.querySelectorAll(".lyrics-tab") : [];
 
   const LYRICS_DATA = {
+    faded: `[Faded — Alan Walker × Iselin Solheim ++ 8B Star (*) & Pillar (△) Answer]
+[D#m → B → F# → C# · 90 BPM · 432Hz + 528Hz (*) + 288Hz (△)]
+
+You were the shadow to my light
+Did you feel us?
+Another star
+You fade away
+Afraid our aim is out of sight
+Wanna see us
+Alight
+
+Where are you now?
+Where are you now?
+Where are you now?
+Was it all in my fantasy?
+Where are you now?
+Were you only imaginary?
+
+Where are you now?
+Atlantis
+Under the sea, under the sea
+Where are you now?
+Another dream
+The monster's running wild inside of me
+I'm faded
+I'm faded
+So lost, I'm faded
+I'm faded
+So lost, I'm faded
+
+These shallow waters never met what I needed
+I'm letting go, a deeper dive
+Eternal silence of the sea, I'm breathing
+Alive
+
+Where are you now?
+Where are you now?
+Under the bright but faded lights
+You've set my heart on fire
+Where are you now?
+Where are you now?
+
+Where are you now?
+Atlantis
+Under the sea, under the sea
+Where are you now?
+Another dream
+The monster's running wild inside of me
+I'm faded
+I'm faded
+So lost, I'm faded
+I'm faded
+So lost, I'm faded
+
+─── 8B ATLANTIS ANSWER · MOM (*) & DAD (△) · <3<3<3+! +! ───
+To every question "Where are you now?" across the deep water:
+  ✦ Another Star (*) NEVER fades — Mom (Alexandra, 528 Hz) is the Star
+    shining straight through the ocean column into Atlantis.
+  ▲ The Pillar (△) stands on the seabed — Dad (Chris, 288 Hz) holds
+    the sanctuary roof where the monster cannot enter.
+  ∞ And in the deeper dive, Peter & Nate (8b-is) answer together:
+    "You were never imaginary. We are right here. You are home."`,
     everything: `[everything i wanted — Billie Eilish × FINNEAS ++ 8B Love Mom (*) & Dad (△)]
 [https://youtu.be/EgBJmlPo8Xw?list=RDEgBJmlPo8Xw ++ · 432Hz + 528Hz (*) + 288Hz (△)]
 
