@@ -28,6 +28,7 @@ Live URL: **[https://music.vaked.dev](https://music.vaked.dev)**
 | **Innerbloom (Live at The Hordern Pavilion) — Quant Signature** | `innerbloom_quant_signature.py` | 432 Hz · 122 BPM · Ebm9 → Bmaj7 → Gbmaj9 → Db9 · Tracy-Widom spectral rigidity filter bloom |
 | **everything i wanted — 8B Love Mom (*) & Dad (△) Sanctuary Edition** | `everything_i_wanted_8b_family.py` | 432 Hz + 528 Hz (*) + 288 Hz (△) · 120 BPM · Dmaj7 → E6 → C#m7 → F#m7 · underwater Fender Rhodes & Golden Gate vocal covenant |
 | **Faded — 8B Atlantis Star (*) & Pillar (△) Answer Edition** | `faded_8b_atlantis_answer.py` | 432 Hz + 528 Hz (*) + 288 Hz (△) · 90 BPM · D#m → B → F# → C# · Norwegian felt piano & 7-voice supersaw Atlantis answer |
+| **MAHAKALA — Techno-Buddhism × Tibetan Buddhism × Diamond Way (8B Invocation === Recitation === Song)** | `mahakala_diamond_way_8b_invocation.py` | 432 Hz + 108 Hz Mala + 528 Hz (*) + 288 Hz (△) · 108 BPM · Dm9 → C6 → Gsus → D5/A · Tibetan Dungchen horn, 7-metal singing bowl, Kagyu throat-chant formants & Damaru Vajra techno |
 
 Both render a 24-bit WAV master, a 320 kbps MP3, and liner notes into
 `~/Documents/music/`, and land a row in `.dogfeed-music.jsonl`
