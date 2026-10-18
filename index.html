@@ -2171,6 +2171,21 @@ And we'll be here.
       });
     });
 
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tParam = (urlParams.get("track") || "").toLowerCase();
+      if (tParam === "mahakala" || tParam === "16" || tParam === "diamond") {
+        if (pills[15]) pills[15].click();
+      } else if (tParam === "faded" || tParam === "15") {
+        if (pills[14]) pills[14].click();
+      } else if (tParam === "everything" || tParam === "14") {
+        if (pills[13]) pills[13].click();
+      } else if (/^\d+$/.test(tParam)) {
+        const ti = parseInt(tParam, 10) - 1;
+        if (pills[ti]) pills[ti].click();
+      }
+    } catch (e) {}
+
     // 🎹 Keyboard Shortcuts for Ultra Pro Navigation
     window.addEventListener("keydown", (e) => {
       // Avoid capturing shortcuts when user is typing in search input
